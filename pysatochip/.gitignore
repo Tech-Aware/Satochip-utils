@@ -1,0 +1,10 @@
+pysatochip/__pycache__/
+__pycache__/
+.venv/
+dist/
+build/
+*.egg-info
+*.pyc
+.idea/
+.vs/
+pysatochip/satochip_cli.py
