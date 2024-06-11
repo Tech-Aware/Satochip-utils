@@ -14,9 +14,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    resources:
-      limits:
-        memory: 8GB  # Augmenter la mémoire disponible pour le job
 
     steps:
     - name: Checkout code
