@@ -260,7 +260,7 @@ class View(customtkinter.CTk):
                     try:
                         # Charger et redimensionner l'image de l'icône
                         image = Image.open(icon_path)
-                        image = image.resize((30, 30), Image.LANCZOS)
+                        image = image.resize((40, 40), Image.LANCZOS)
                         logger.debug("Icon image resized successfully")
                     except Exception as e:
                         logger.error(f"An error occurred while loading and resizing the icon image: {e}", exc_info=True)
@@ -278,7 +278,7 @@ class View(customtkinter.CTk):
                     try:
                         # Créer le bouton avec l'image de l'icône
                         button = customtkinter.CTkButton(header_frame, text=title_text, image=photo_image,
-                                                         font=customtkinter.CTkFont(family="Outfit", size=20,
+                                                         font=customtkinter.CTkFont(family="Outfit", size=25,
                                                                                     weight="bold"),
                                                          bg_color="whitesmoke", fg_color="whitesmoke", text_color="black",
                                                          hover_color="whitesmoke", compound="left")
@@ -394,7 +394,7 @@ class View(customtkinter.CTk):
                         logger.debug(f"Creating label with background color: {bg_fg_color}")
                         label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color=bg_fg_color,
                                                        fg_color=bg_fg_color,
-                                                       font=customtkinter.CTkFont(family="Outfit", size=16,
+                                                       font=customtkinter.CTkFont(family="Outfit", size=18,
                                                                                   weight="normal"))
                     except Exception as e:
                         logger.warning(f"An error occurred while creating label with background color: {e}",
@@ -404,7 +404,7 @@ class View(customtkinter.CTk):
                         logger.debug(f"Creating label with background color: whitesmoke")
                         label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color="whitesmoke",
                                                        fg_color="whitesmoke",
-                                                       font=customtkinter.CTkFont(family="Outfit", size=16,
+                                                       font=customtkinter.CTkFont(family="Outfit", size=18,
                                                                                   weight="normal"))
                     except Exception as e:
                         logger.warning(f"An error occurred while creating label with background color: {e}",
@@ -1235,7 +1235,7 @@ class View(customtkinter.CTk):
             logger.debug("Creating new frame and background")
             self.current_frame = View.create_frame(self)
             self.current_frame.place(relx=0.5, rely=0.5, anchor="center")
-            self.background_photo = View.create_background_photo(self, "./pictures_db/welcome_in_satochip_utils.jpg")
+            self.background_photo = View.create_background_photo(self, "./pictures_db/welcome_in_satochip_utils.png")
             self.canvas = View.create_canvas(self)
             self.canvas.place(relx=0.5, rely=0.5, anchor="center")
             self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
@@ -1306,7 +1306,7 @@ class View(customtkinter.CTk):
 
             logger.debug("Creating header")
             self.header = View.create_an_header(self, "Welcome", "home_popup.jpg")
-            self.header.place(relx=0.32, rely=0.05, anchor="nw")
+            self.header.place(relx=0.32, rely=0.08, anchor="nw")
             logger.debug("Header created and placed")
 
             logger.debug("Creating main frame")
@@ -1319,18 +1319,16 @@ class View(customtkinter.CTk):
                 logger.info("card_present")
                 logger.info(f"card type: {self.card_type}")
                 if self.card_type == "Satochip":
-                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_satochip.jpg")
+                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_satochip.png")
                     logger.info("bg_photo = satochip")
                 elif self.card_type == "SeedKeeper":
                     logger.info(f"card type is {self.card_type}")
-                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_seedkeeper.jpg")
+                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_seedkeeper.png")
                     logger.info("bg_photo = seedkeeper")
                 elif self.card_type == "Satodime":
-                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_satodime.jpg")
-
-
+                    self.background_photo = View.create_background_photo(self, "./pictures_db/card_satodime.png")
             else:
-                self.background_photo = View.create_background_photo(self, "./pictures_db/insert_card.jpg")
+                self.background_photo = View.create_background_photo(self, "./pictures_db/insert_card.png")
                 logger.info("bg_photo = no card")
 
             self.canvas = View.create_canvas(self)
@@ -1340,15 +1338,12 @@ class View(customtkinter.CTk):
 
             logger.debug("Setting up labels")
             self.label = View.create_label(self,
-                                           "Version: Satochip-Utils-0.4.1\n______________________")
-            self.label.place(relx=0.333, rely=0.2, anchor="w")
-            self.label = View.create_label(self,
                                            "Please insert your card into your smart card" if not self.card_present else f"Your {self.card_type} is connected.")
-            self.label.place(relx=0.33, rely=0.33, anchor="w")
+            self.label.place(relx=0.33, rely=0.27, anchor="w")
 
             self.label = View.create_label(self,
                                            "reader, and select the action you wish to perform." if not self.card_present else "Select on the menu the action you wish to perform.")
-            self.label.place(relx=0.33, rely=0.38, anchor="w")
+            self.label.place(relx=0.33, rely=0.32, anchor="w")
             logger.debug("Labels created and placed")
 
             logger.debug("Creating main menu")
@@ -2183,7 +2178,7 @@ class View(customtkinter.CTk):
             except Exception as e:
                 logger.error(f"An error occurred while creating new frame: {e}", exc_info=True)
 
-            self.background_photo = View.create_background_photo(self, "./pictures_db/reset_my_card.jpg")
+            self.background_photo = View.create_background_photo(self, "./pictures_db/reset_my_card.png")
             self.canvas = View.create_canvas(self)
             self.canvas.place(relx=0.250, rely=0.501, anchor="w")
             self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
@@ -2336,7 +2331,7 @@ class View(customtkinter.CTk):
 
                 self.header.place(relx=0.32, rely=0.05, anchor="nw")
 
-                self.background_photo = View.create_background_photo(self, "./pictures_db/about.jpg")
+                self.background_photo = View.create_background_photo(self, "./pictures_db/about.png")
                 self.canvas = View.create_canvas(self)
                 self.canvas.place(relx=0.250, rely=0.501, anchor="w")
                 self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
@@ -2370,9 +2365,9 @@ class View(customtkinter.CTk):
                 logger.info(f"self.spot_if_unlock is: {self.spot_if_unlock}")
                 self.watch_all = self.create_label("PIN required to look at complete information")
                 self.unlock_button = self.create_button("Unlock", lambda: [unlock()])
-                self.watch_all.place(relx=0.33, rely=0.15)
-                self.unlock_button.configure(width=10, height=5, font=self.make_text_size_at(18))
-                self.unlock_button.place(relx=0.65, rely=0.15)
+                self.watch_all.place(relx=0.33, rely=0.17)
+                self.unlock_button.configure(font=self.make_text_size_at(15))
+                self.unlock_button.place(relx=0.7, rely=0.16)
 
                 # card infos
                 card_information = self.create_label("Card information")
@@ -2380,14 +2375,14 @@ class View(customtkinter.CTk):
                 card_information.configure(font=self.make_text_bold())
 
                 if self.spot_if_unlock:
-
+                    self.unlock_button.configure(state='disabled')
                     self.card_label_named = self.create_label(f"Label: [{self.controller.get_card_label_infos()}]")
                     self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
                     is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.controller.cc.card_verify_authenticity()
                     if is_authentic:
-                        self.card_genuine = self.create_label(f"Genuine: [YES]")
+                        self.card_genuine = self.create_label(f"Genuine: YES")
                     else:
-                        self.card_genuine = self.create_label("Genuine: [NO]")
+                        self.card_genuine = self.create_label("Genuine: NO")
                 else:
                     self.card_label_named = self.create_label(f"Label: [UNKNOWN]")
                     self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
@@ -2399,15 +2394,20 @@ class View(customtkinter.CTk):
 
                 # card configuration
                 card_configuration = self.create_label("Card configuration")
-                card_configuration.place(relx=0.33, rely=0.5, anchor="w")
+                card_configuration.place(relx=0.33, rely=0.55, anchor="w")
                 card_configuration.configure(font=self.make_text_bold())
                 pin_information = self.create_label(f"Wrong PIN counter:[{self.controller.pin_left}], tries remaining.")
-                pin_information.place(relx=0.33, rely=0.53)
-                two_FA = self.create_label(f"2FA enable: [YES]" if self.controller.two_FA else f"2FA enable: [NO]")
+                pin_information.place(relx=0.33, rely=0.6)
+
+                # for a next implementation of 2FA functionality you have the code below
+                '''two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
                 two_FA.place(relx=0.33, rely=0.58)
-                button_2FA = self.create_button("Enable 2FA", None)
-                button_2FA.configure(width=5, height=5, font=self.make_text_size_at(15))
-                button_2FA.place(relx=0.5, rely=0.58)
+                if self.controller.two_FA:
+                    self.button_2FA = self.create_button("Disable 2FA", None)
+                else:
+                    self.button_2FA = self.create_button("Enable 2FA")
+                self.button_2FA.configure(font=self.make_text_size_at(15))
+                self.button_2FA.place(relx=0.5, rely=0.58)
 
                 # card connectivity
                 card_connectivity = self.create_label("Card connectivity")
@@ -2415,18 +2415,18 @@ class View(customtkinter.CTk):
                 card_connectivity.configure(font=self.make_text_bold())
 
                 if self.controller.nfc == 0:
-                    nfc = self.create_label(f"NFC: [ENABLED]")
-                    self.button_nfc = self.create_button("Disable NFC", None)
+                    nfc = self.create_label(f"NFC enabled")
+                    self.button_nfc = self.create_button("Disable NFC")
 
                 elif self.controller.nfc == 1:
-                    nfc = self.create_label(f"NFC: [DISABLED]")
-                    self.button_nfc = self.create_button("Enable NFC", None)
+                    nfc = self.create_label(f"NFC disabled:")
+                    self.button_nfc = self.create_button("Enable NFC")
 
                 else:
                     nfc = self.create_label(f"NFC: [BLOCKED]")
-                nfc.place(relx=0.33, rely=0.71)
-                self.button_nfc.configure(width=5, height=5, font=self.make_text_size_at(15))
-                self.button_nfc.place(relx=0.496, rely=0.71)
+                nfc.place(relx=0.33, rely=0.715)
+                self.button_nfc.configure(font=self.make_text_size_at(15))
+                self.button_nfc.place(relx=0.5, rely=0.71)'''
 
                 # software information
                 software_information = self.create_label("Software information")
