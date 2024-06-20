@@ -252,7 +252,8 @@ class Controller:
                                 seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
                             self.request("show",
                                          "WARNING",
-                                         "Your mnemonic is very important!\n Be Sure to copy it into clipboard\n and keep it safe !")
+                                         "Your mnemonic is very important!\nBe sure to copy it in a safe place.", 'Ok',
+                                         None, "./pictures_db/icon_seed_popup.jpg")
                         else:
                             logger.warning("Setup my card seed: Invalid strength value.")
                             self.request("show", "ERROR", "Invalid strength value.", 'Ok', None,
@@ -329,12 +330,12 @@ class Controller:
                                     logger.info(f"New label set successfully: {label}")
                                     self.card_label = label
                                     self.request("show", "SUCCESS",
-                                                 f"New Label set successfully as {label}",
-                                                 "Ok!",
+                                                 f"New Label set successfully",
+                                                 "Ok",
                                                  self.request("start_setup"), "./pictures_db/icon_edit_label_popup.jpg")
                                 else:
                                     logger.warning("Failed to set new label.")
-                                    self.request("show", "ERROR", "Failed to set new label.", "Ok!", None,
+                                    self.request("show", "ERROR", "Failed to set label: too long.", "oK", None,
                                                  "./pictures_db/icon_edit_label_popup.jpg")
                             else:
                                 logger.warning("Blank label cannot be set.")
@@ -381,7 +382,7 @@ class Controller:
                                 else:
                                     logger.error(f"Failed to change PIN with error code: {hex(sw1)}{hex(sw2)}")
                                     msg = f"Failed to change PIN with error code: {hex(sw1)}{hex(sw2)}"
-                                    self.request("show", "ERROR", msg, 'Ok',
+                                    self.request("show", "ERROR", f"{msg}\n Probably too long", 'Ok',
                                                  None, "./pictures_db/icon_change_pin_popup.jpg")
                 except Exception as e:
                     logger.error(f"Error changing PIN: {e}")

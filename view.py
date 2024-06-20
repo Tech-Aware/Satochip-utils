@@ -914,13 +914,13 @@ class View(customtkinter.CTk):
                     rel_y=0.73, rel_x=0.5052,
                     command=lambda: self.about(), state='normal'
                 )
-                self.create_button_for_main_menu_item(
+                '''self.create_button_for_main_menu_item(
                     menu_frame,
                     "Refresh menu",
                     "refresh.jpg",
                     rel_y=0.8, rel_x=0.593,
                     command=refresh_main_menu, state='normal'
-                )
+                )'''
             else:
                 self.create_button_for_main_menu_item(
                     menu_frame,
@@ -936,13 +936,13 @@ class View(customtkinter.CTk):
                     rel_y=0.73, rel_x=0.5052,
                     command=lambda: self.about(), state='disabled'
                 )
-                self.create_button_for_main_menu_item(
+                '''self.create_button_for_main_menu_item(
                     menu_frame,
                     "Refresh menu",
                     "refresh_locked.jpg",
                     rel_y=0.8, rel_x=0.587,
                     command=refresh_main_menu, state='disabled'
-                )
+                )'''
 
             self.create_button_for_main_menu_item(
                 menu_frame,
@@ -1013,7 +1013,7 @@ class View(customtkinter.CTk):
 
                         if self.app_open:
                             self.start_setup()
-                            self.show('ERROR', 'Insert card into smartcard reader.\n [...]', 'ok',
+                            self.show('ERROR', 'Insert card into smartcard reader.', 'Ok',
                                       None, "./pictures_db/icon_insert_card_popup.png")
 
                     except Exception as e:
@@ -2118,7 +2118,7 @@ class View(customtkinter.CTk):
                 if sw1 == 0xFF and sw2 == 0x00:
                     logger.info("Factory reset successful. Disconnecting the card.")
                     self.controller.cc.card_factory_disconnect()
-                    msg = 'CARD HAS BEEN RESET TO FACTORY!\nRemaining counter: 0'
+                    msg = 'The card has been factory reset\nRemaining counter: 0'
                     self.show('SUCCESS', msg, "Ok", lambda: self.restart_app(),
                               "./pictures_db/icon_reset_popup.jpg")
                     logger.info("Card has been reset to factory. Counter set to 0.")
