@@ -1514,6 +1514,14 @@ class View(customtkinter.CTk):
             generate_with_passphrase = False  # Variable pour déterminer si une passphrase doit être ajoutée
             logger.debug(f"Settings radio_value: {radio_value}, generate_with_passphrase: {generate_with_passphrase}")
 
+            def on_entry_click(event):
+                if passphrase_entry.get() == "Type your passphrase here":
+                    passphrase_entry.delete(0, "end")
+
+            def on_text_box_click(event):
+                if self.text_box.get("1.0", "end-1c") == "Type your existing seedphrase here":
+                    self.text_box.delete("1.0", "end")
+
             def update_radio_selection():
                 nonlocal mnemonic_length, generate_with_passphrase
                 self.import_seed = False
@@ -1532,14 +1540,18 @@ class View(customtkinter.CTk):
                     radio_button_passphrase.place(relx=0.35, rely=0.58, anchor="w")
                     self.text_box.delete(1.0, "end")
                     self.text_box.insert(text="Type your existing seedphrase here", index=1.0)
+                    self.text_box.bind("<FocusIn>", on_text_box_click)
                     self.text_box.place_forget()
                     self.text_box.place(relx=0.35, rely=0.45, anchor="w")
+
 
                     if radio_value_passphrase.get() == "passphrase":
                         logger.debug("Generate seed with passphrase")
                         generate_with_passphrase = True
                         passphrase_entry.place(relx=0.35, rely=0.65, anchor="w")
-                        passphrase_entry.insert(string="   Type your passphrase here", index=0)
+                        passphrase_entry.insert(string="Type your passphrase here", index=0)
+                        passphrase_entry.bind("<FocusIn>", on_entry_click)
+
 
                 if radio_value.get() == "generate":
                     self.import_seed = False
@@ -1556,12 +1568,12 @@ class View(customtkinter.CTk):
                     radio_button_generate.place(relx=0.33, rely=0.35, anchor="w")
                     radio_button_generate_12_words.place(relx=0.38, rely=0.42, anchor="w")
                     radio_button_generate_24_words.place(relx=0.53, rely=0.42, anchor="w")
+                    radio_button_passphrase.place(relx=0.38, rely=0.47, anchor="w")
                     self.text_box.configure(width=425, height=73)
-                    self.text_box.place(relx=0.37, rely=0.56, anchor="w")
+                    self.text_box.place(relx=0.37, rely=0.63, anchor="w")
                     label = View.create_label(self, "Generated seedphrase")
-                    label.place(relx=0.38, rely=0.48, anchor="w")
-                    generate_seed_button.place(relx=0.81, rely=0.59, anchor="w")
-                    radio_button_passphrase.place(relx=0.38, rely=0.65, anchor="w")
+                    label.place(relx=0.38, rely=0.54, anchor="w")
+                    generate_seed_button.place(relx=0.81, rely=0.66, anchor="w")
 
                     if radio_value_mnemonic.get() == "generate_12":
                         logger.debug("Generate seed of 12 words")
@@ -1575,8 +1587,9 @@ class View(customtkinter.CTk):
                     if radio_value_passphrase.get() == "passphrase":
                         logger.debug("Generate seed with passphrase")
                         generate_with_passphrase = True
-                        passphrase_entry.place(relx=0.37, rely=0.72, anchor="w")
-                        passphrase_entry.insert(string="   Type your passphrase here", index=0)
+                        passphrase_entry.place(relx=0.37, rely=0.74, anchor="w")
+                        passphrase_entry.insert(string="Type your passphrase here", index=0)
+                        passphrase_entry.bind("<FocusIn>", on_entry_click)
 
             try:
                 logger.debug("Setting up radio buttons and entry fields")
