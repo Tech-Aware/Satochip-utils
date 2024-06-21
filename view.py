@@ -767,6 +767,7 @@ class View(customtkinter.CTk):
                                                 border_width=0)
             logger.debug("Menu frame created successfully")
 
+            # todo: cancel the function below
             def refresh_main_menu():
                 try:
                     logger.info("Refreshing main menu")
@@ -1013,8 +1014,7 @@ class View(customtkinter.CTk):
 
                         if self.app_open:
                             self.start_setup()
-                            self.show('ERROR', 'Insert card into smartcard reader.', 'Ok',
-                                      None, "./pictures_db/icon_insert_card_popup.png")
+
 
                     except Exception as e:
                         logger.error(f"An error occurred while resetting card status: {e}", exc_info=True)
@@ -1942,7 +1942,7 @@ class View(customtkinter.CTk):
                     if certificate_radio_value.get() == 'device_certificate':
                         logger.info(f"Button clicked: {certificate_radio_value.get()}")
                         self.update_textbox(txt_device)
-                        self.text_box.place(relx=0.33, rely=0.6, anchor="w")
+                        self.text_box.place(relx=0.33, rely=0.6, anchor="w") if is_authentic else self.text_box.place(relx=0.33, rely=0.52, anchor="w")
                 except Exception as e:
                     logger.error(f"An error occurred in update_radio_selection: {e}", exc_info=True)
 
@@ -1961,40 +1961,42 @@ class View(customtkinter.CTk):
                         icon_image = Image.open("./pictures_db/icon_genuine_card.jpg")
                         icon = customtkinter.CTkImage(light_image=icon_image, size=(30, 30))
                         icon_label = customtkinter.CTkLabel(self.current_frame, image=icon,
-                                                            text=f"Your card is authentic.",
+                                                            text=f"Your card is authentic. ",
                                                             compound='right', bg_color="whitesmoke", fg_color="whitesmoke",
                                                             font=customtkinter.CTkFont(family="Outfit",
                                                                                        size=18,
                                                                                        weight="normal"))
-                        icon_label.place(relx=0.39, rely=0.265, anchor="w")
+                        icon_label.place(relx=0.4, rely=0.267, anchor="w")
 
                     else:
+
+
                         icon_image = Image.open("./pictures_db/icon_not_genuine_card.jpg")
                         icon = customtkinter.CTkImage(light_image=icon_image, size=(30, 30))
                         icon_label = customtkinter.CTkLabel(self.current_frame, image=icon,
-                                                            text=f"Your card is not authentic.",
+                                                            text=f"Your card is not authentic. ",
                                                             compound='right', bg_color="whitesmoke", fg_color="whitesmoke",
                                                             font=customtkinter.CTkFont(family="Outfit",
                                                                                        size=18,
                                                                                        weight="normal"))
-                        icon_label.place(relx=0.39, rely=0.265, anchor="w")
+                        icon_label.place(relx=0.4, rely=0.267, anchor="w")
 
                         text = View.create_label(self, f"Warning!")
                         text.configure(font=self.make_text_bold())
-                        text.place(relx=0.33, rely=0.40, anchor="w")
+                        text.place(relx=0.33, rely=0.7, anchor="w")
                         text = View.create_label(self, f"We could not authenticate the issuer of this card.")
-                        text.place(relx=0.33, rely=0.45, anchor="w")
+                        text.place(relx=0.33, rely=0.75, anchor="w")
                         text = View.create_label(self,
                                                  f"If you did not load the card applet by yourself, be extremely careful!")
-                        text.place(relx=0.33, rely=0.5, anchor="w")
+                        text.place(relx=0.33, rely=0.8, anchor="w")
                         text = View.create_label(self,
                                                  f"Contact support@satochip.io to report any suspicious device.")
-                        text.place(relx=0.33, rely=0.6, anchor="w")
+                        text.place(relx=0.33, rely=0.9, anchor="w")
 
-                        self.root_ca_certificate.place_forget()
-                        self.sub_ca_certificate.place_forget()
-                        self.device_certificate.place_forget()
-                        self.text_box.place_forget()
+
+
+
+
 
                 logger.debug("Setting up radio buttons")
                 self.root_ca_certificate = customtkinter.CTkRadioButton(self.current_frame,
@@ -2007,7 +2009,7 @@ class View(customtkinter.CTk):
                                                                         bg_color="whitesmoke", fg_color="green",
                                                                         hover_color="green",
                                                                         command=update_radio_selection)
-                self.root_ca_certificate.place(relx=0.33, rely=0.35, anchor="w")
+                self.root_ca_certificate.place(relx=0.33, rely=0.35, anchor="w") if is_authentic else None
 
                 self.sub_ca_certificate = customtkinter.CTkRadioButton(self.current_frame,
                                                                        text="Sub CA certificate",
@@ -2019,7 +2021,7 @@ class View(customtkinter.CTk):
                                                                        bg_color="whitesmoke", fg_color="green",
                                                                        hover_color="green",
                                                                        command=update_radio_selection)
-                self.sub_ca_certificate.place(relx=0.50, rely=0.35, anchor="w")
+                self.sub_ca_certificate.place(relx=0.50, rely=0.35, anchor="w") if is_authentic else None
 
                 self.device_certificate = customtkinter.CTkRadioButton(self.current_frame,
                                                                        text="Device certificate",
@@ -2031,7 +2033,7 @@ class View(customtkinter.CTk):
                                                                        bg_color="whitesmoke", fg_color="green",
                                                                        hover_color="green",
                                                                        command=update_radio_selection)
-                self.device_certificate.place(relx=0.67, rely=0.35, anchor="w")
+                self.device_certificate.place(relx=0.67, rely=0.35, anchor="w") if is_authentic else self.device_certificate.place(relx=0.33, rely=0.35, anchor="w")
                 logger.debug("Radio buttons set up")
             except Exception as e:
                 logger.error(f"An error occurred while setting up radio buttons: {e}", exc_info=True)
@@ -2041,7 +2043,7 @@ class View(customtkinter.CTk):
                 self.text_box = customtkinter.CTkTextbox(self, corner_radius=10,
                                                          bg_color='whitesmoke', fg_color=BUTTON_COLOR,
                                                          border_color=BUTTON_COLOR, border_width=0,
-                                                         width=581, height=228,
+                                                         width=581, height=228 if is_authentic else 150,
                                                          text_color="grey",
                                                          font=customtkinter.CTkFont(family="Outfit", size=13,
                                                                                     weight="normal"))
