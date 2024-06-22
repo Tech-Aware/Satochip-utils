@@ -2,7 +2,6 @@ import logging
 import sys
 import os
 import time
-
 import _tkinter
 import customtkinter
 from customtkinter import CTkImage
@@ -29,6 +28,8 @@ HOVER_COLOR = "grey"
 TEXT_COLOR = "black"
 
 ICON_PATH = "./pictures_db/icon_"
+
+APP_VERSION = "0.4.1"
 
 
 class View(customtkinter.CTk):
@@ -2307,6 +2308,8 @@ class View(customtkinter.CTk):
             logger.error(f"An unexpected error occurred in click_abort: {e}", exc_info=True)
 
     def about(self):
+
+        from pysatochip.pysatochip.version import PYSATOCHIP_VERSION
         try:
             logger.info("IN View.edit_label() | Entering edit_label method")
             frame_name = "edit_label"
@@ -2447,9 +2450,9 @@ class View(customtkinter.CTk):
                 software_information = self.create_label("Software information")
                 software_information.place(relx=0.33, rely=0.81, anchor="w")
                 software_information.configure(font=self.make_text_bold())
-                self.version = self.create_label("Satochip-utils version: 0.4.1")
-                self.version.place(relx=0.33, rely=0.83)
-                self.pysatochip_version = self.create_label("Pysatochip version: 0.12.6")
+                self.app_version = self.create_label(f"Satochip-utils version: {APP_VERSION}")
+                self.app_version.place(relx=0.33, rely=0.83)
+                self.pysatochip_version = self.create_label(f"Pysatochip version: {PYSATOCHIP_VERSION}")
                 self.pysatochip_version.place(relx=0.33, rely=0.88)
 
 
