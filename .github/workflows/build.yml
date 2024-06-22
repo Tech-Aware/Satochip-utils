@@ -36,10 +36,9 @@ jobs:
     - name: Install dependencies on macOS
       if: matrix.os == 'macos-latest'
       run: |
-        brew install swig
-        arch -arm64 brew install python@3.9
-        arch -x86_64 brew install python@3.9
-        python3 -m pip install --upgrade pip
+        brew install miniforge
+        conda create -n myenv python=3.9 --yes
+        source activate myenv
         pip install -r requirements.txt
 
     - name: Install dependencies on Windows
@@ -61,7 +60,8 @@ jobs:
     - name: Build executable (macOS - universal)
       if: matrix.os == 'macos-latest'
       run: |
-        env ARCHFLAGS="-arch x86_64 -arch arm64" pyinstaller --onefile --target-arch universal2 --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+        source activate myenv
+        pyinstaller --onefile --target-arch universal2 --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
 
     - name: Upload artifact (Windows)
       if: matrix.os == 'windows-latest'
