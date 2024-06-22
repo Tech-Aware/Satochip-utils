@@ -36,10 +36,11 @@ jobs:
     - name: Install dependencies on macOS
       if: matrix.os == 'macos-latest'
       run: |
-        brew install miniforge
-        conda create -n myenv python=3.9 --yes
-        source activate myenv
+        brew install micromamba
+        micromamba create -n myenv python=3.9 -c conda-forge
+        micromamba activate myenv
         pip install -r requirements.txt
+        pip install Pillow
 
     - name: Install dependencies on Windows
       if: matrix.os == 'windows-latest'
@@ -60,8 +61,7 @@ jobs:
     - name: Build executable (macOS - universal)
       if: matrix.os == 'macos-latest'
       run: |
-        source activate myenv
-        pyinstaller --onefile --target-arch universal2 --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+        micromamba run -n myenv pyinstaller --onefile --target-arch universal2 --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
 
     - name: Upload artifact (Windows)
       if: matrix.os == 'windows-latest'
