@@ -14,16 +14,24 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    timeout-minutes: 30  # Augmenter le timeout global
+    timeout-minutes: 30
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: Set up Python for Linux and Windows
+      if: matrix.os != 'macos-latest'
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
+
+    - name: Set up Python for macOS
+      if: matrix.os == 'macos-latest'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        architecture: 'arm64'
 
     - name: Install system dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -36,26 +44,39 @@ jobs:
       run: |
         brew install swig
 
-    - name: Upgrade pip and install dependencies
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
         python -m pip install --upgrade pip
-        pip install --no-cache-dir -r requirements.txt
-        pip install pyinstaller
+        pip install --no-use-pep517 pyaes==1.6.1
+        pip install -r requirements.txt
+
+    - name: Install dependencies (non-Windows)
+      if: matrix.os != 'windows-latest'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install PyInstaller
+      run: pip install pyinstaller
 
     - name: Build executable (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --onefile --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
+        pyinstaller --onefile --log-level DEBUG --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
+      timeout-minutes: 15
 
     - name: Build executable (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        pyinstaller --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+        pyinstaller --onefile --log-level DEBUG --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+      timeout-minutes: 15
 
     - name: Build executable (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        pyinstaller --onefile --target-arch universal2 --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+        pyinstaller --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
+      timeout-minutes: 15
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
