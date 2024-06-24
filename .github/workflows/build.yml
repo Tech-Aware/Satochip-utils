@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    timeout-minutes: 45  # Augmenté pour donner plus de temps
+    timeout-minutes: 60  # Augmenté pour donner plus de temps
 
     steps:
     - name: Checkout code
@@ -29,7 +29,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libpcsclite-dev swig python3-tk
+        sudo apt-get install -y libpcsclite-dev swig python3-tk fuse libfuse2
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-latest'
@@ -47,35 +47,29 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         pyinstaller --log-level DEBUG --onefile --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
-      timeout-minutes: 20
+      timeout-minutes: 30
 
     - name: Build AppImage (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
         pyinstaller --log-level DEBUG --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-        # Installer les outils nécessaires pour créer un AppImage
-        sudo apt-get install -y wget
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x appimagetool-x86_64.AppImage
-        # Créer la structure de répertoires pour AppImage
         mkdir -p AppDir/usr/bin
         cp dist/satochip_utils AppDir/usr/bin/
-        # Créer le fichier .desktop
         echo "[Desktop Entry]
         Name=Satochip Utils
         Exec=satochip_utils
         Icon=satochip_utils
         Type=Application
         Categories=Utility;" > AppDir/satochip_utils.desktop
-        # Créer l'AppImage
         ./appimagetool-x86_64.AppImage AppDir
-      timeout-minutes: 20
+      timeout-minutes: 30
 
     - name: Build DMG (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         pyinstaller --log-level DEBUG --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-        # Créer le DMG
         create-dmg \
           --volname "Satochip Utils" \
           --window-pos 200 120 \
@@ -86,7 +80,9 @@ jobs:
           --app-drop-link 400 150 \
           "Satochip_Utils.dmg" \
           "dist/"
-      timeout-minutes: 20
+        # Compresser le DMG
+        gzip -9 Satochip_Utils.dmg
+      timeout-minutes: 30
 
     - name: Upload artifact (Windows)
       if: matrix.os == 'windows-latest'
@@ -94,6 +90,7 @@ jobs:
       with:
         name: windows-satochip_utils
         path: dist/satochip_utils.exe
+      timeout-minutes: 10
 
     - name: Upload artifact (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -101,10 +98,12 @@ jobs:
       with:
         name: linux-satochip_utils
         path: Satochip_Utils-x86_64.AppImage
+      timeout-minutes: 10
 
     - name: Upload artifact (macOS)
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v3
       with:
         name: macos-satochip_utils
-        path: Satochip_Utils.dmg
+        path: Satochip_Utils.dmg.gz
+      timeout-minutes: 10
