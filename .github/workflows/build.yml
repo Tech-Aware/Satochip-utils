@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    timeout-minutes: 60  # Augmenté pour donner plus de temps
+    timeout-minutes: 60
 
     steps:
     - name: Checkout code
@@ -29,7 +29,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libpcsclite-dev swig python3-tk fuse libfuse2
+        sudo apt-get install -y libpcsclite-dev swig python3-tk fuse libfuse2 appstream
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-latest'
@@ -47,7 +47,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         pyinstaller --log-level DEBUG --onefile --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
-      timeout-minutes: 30
+      timeout-minutes: 40
 
     - name: Build AppImage (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -55,8 +55,10 @@ jobs:
         pyinstaller --log-level DEBUG --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x appimagetool-x86_64.AppImage
-        mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
         cp dist/satochip_utils AppDir/usr/bin/
+        # Créer une icône basique si elle n'existe pas
+        convert -size 256x256 xc:transparent -fill black -draw "text 40,125 'Satochip Utils'" AppDir/usr/share/icons/hicolor/256x256/apps/satochip_utils.png
         echo "[Desktop Entry]
         Name=Satochip Utils
         Exec=satochip_utils
@@ -80,7 +82,6 @@ jobs:
           --app-drop-link 400 150 \
           "Satochip_Utils.dmg" \
           "dist/"
-        # Compresser le DMG
         gzip -9 Satochip_Utils.dmg
       timeout-minutes: 30
 
@@ -90,7 +91,7 @@ jobs:
       with:
         name: windows-satochip_utils
         path: dist/satochip_utils.exe
-      timeout-minutes: 10
+      timeout-minutes: 15
 
     - name: Upload artifact (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -98,7 +99,7 @@ jobs:
       with:
         name: linux-satochip_utils
         path: Satochip_Utils-x86_64.AppImage
-      timeout-minutes: 10
+      timeout-minutes: 15
 
     - name: Upload artifact (macOS)
       if: matrix.os == 'macos-latest'
@@ -106,4 +107,4 @@ jobs:
       with:
         name: macos-satochip_utils
         path: Satochip_Utils.dmg.gz
-      timeout-minutes: 10
+      timeout-minutes: 15
