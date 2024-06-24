@@ -29,7 +29,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libpcsclite-dev swig python3-tk fuse libfuse2 appstream
+        sudo apt-get install -y libpcsclite-dev swig python3-tk fuse libfuse2 appstream fonts-liberation imagemagick
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-latest'
@@ -41,7 +41,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --no-input -r requirements.txt
-        pip install pyinstaller
+        pip install pyinstaller==5.7.0  # Spécifiez une version stable de PyInstaller
 
     - name: Build executable (Windows)
       if: matrix.os == 'windows-latest'
@@ -57,8 +57,8 @@ jobs:
         chmod +x appimagetool-x86_64.AppImage
         mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
         cp dist/satochip_utils AppDir/usr/bin/
-        # Créer une icône basique si elle n'existe pas
-        convert -size 256x256 xc:transparent -fill black -draw "text 40,125 'Satochip Utils'" AppDir/usr/share/icons/hicolor/256x256/apps/satochip_utils.png
+        # Utilisez une image prédéfinie ou créez une image simple sans texte
+        convert -size 256x256 xc:black AppDir/usr/share/icons/hicolor/256x256/apps/satochip_utils.png
         echo "[Desktop Entry]
         Name=Satochip Utils
         Exec=satochip_utils
