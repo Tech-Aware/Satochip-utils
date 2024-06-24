@@ -273,11 +273,15 @@ class Controller:
                             if MNEMONIC.check(mnemonic):  # check that seed is valid
                                 logger.info("Imported seed is valid.")
                                 if passphrase is not None:
-                                    seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
-                                    logger.info(f"seed:{seed}")
-                                    logger.info(f"mnemonic: {mnemonic}")
-                                    logger.info(f"passphrase: {passphrase}")
-                                    self.card_setup_native_seed(seed)
+                                    if passphrase in ["", " ", "Type your passphrase here"]:
+                                        logger.error("Passphrase is blank or empy")
+                                        self.request('show', 'WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
+                                    else:
+                                        seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
+                                        logger.info(f"seed:{seed}")
+                                        logger.info(f"mnemonic: {mnemonic}")
+                                        logger.info(f"passphrase: {passphrase}")
+                                        self.card_setup_native_seed(seed)
                                 else:
                                     seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
                                     logger.info(f"seed:{seed}")
@@ -330,7 +334,7 @@ class Controller:
                                     logger.info(f"New label set successfully: {label}")
                                     self.card_label = label
                                     self.request("show", "SUCCESS",
-                                                 f"New Label set successfully",
+                                                 f"New label set successfully",
                                                  "Ok",
                                                  self.request("start_setup"), "./pictures_db/icon_edit_label_popup.jpg")
                                 else:

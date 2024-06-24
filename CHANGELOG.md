@@ -24,4 +24,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Alignement into check_authenticity frame
 - Pin that was always asked into about
 - Syntax calling of self.version to self.app_version
-- 
+- Syntax correction in popup and chang pin frame
+- Add control for blank, none and Type your passphrase here

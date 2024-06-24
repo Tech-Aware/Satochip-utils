@@ -1761,7 +1761,7 @@ class View(customtkinter.CTk):
 
                 logger.debug("Setting up PIN entry fields")
                 # input current PIN
-                current_pin_label = View.create_label(self, "Current PIN :")
+                current_pin_label = View.create_label(self, "Current PIN:")
                 current_pin_label.configure(font=self.make_text_size_at(18))
                 current_pin_label.place(relx=0.33, rely=0.40, anchor="w")
                 current_pin_entry = View.create_entry(self, "*")
@@ -1769,14 +1769,14 @@ class View(customtkinter.CTk):
                 current_pin_entry.place(relx=0.33, rely=0.45, anchor="w")
 
                 # input new PIN
-                new_pin_label = View.create_label(self, "New PIN Code :")
+                new_pin_label = View.create_label(self, "New PIN code:")
                 new_pin_label.configure(font=self.make_text_size_at(18))
                 new_pin_label.place(relx=0.33, rely=0.55, anchor="w")
                 new_pin_entry = View.create_entry(self, "*")
                 new_pin_entry.place(relx=0.33, rely=0.60, anchor="w")
 
                 # confirm new PIN
-                confirm_new_pin_label = View.create_label(self, "Repeat New PIN Code :")
+                confirm_new_pin_label = View.create_label(self, "Repeat new PIN code:")
                 confirm_new_pin_label.configure(font=self.make_text_size_at(18))
                 confirm_new_pin_label.place(relx=0.33, rely=0.70, anchor="w")
                 confirm_new_pin_entry = View.create_entry(self, "*")
@@ -2389,7 +2389,7 @@ class View(customtkinter.CTk):
 
                 # card infos
                 card_information = self.create_label("Card information")
-                card_information.place(relx=0.33, rely=0.27, anchor="w")
+                card_information.place(relx=0.33, rely=0.25, anchor="w")
                 card_information.configure(font=self.make_text_bold())
 
                 if self.spot_if_unlock:
@@ -2406,25 +2406,25 @@ class View(customtkinter.CTk):
                     self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
                     self.card_genuine = self.create_label(f"Genuine: [UNKNOWN]")
 
-                self.card_label_named.place(relx=0.33, rely=0.30)
-                self.applet_version.place(relx=0.33, rely=0.35)
-                self.card_genuine.place(relx=0.33, rely=0.4)
+                self.card_label_named.place(relx=0.33, rely=0.28)
+                self.applet_version.place(relx=0.33, rely=0.33)
+                self.card_genuine.place(relx=0.33, rely=0.38)
 
                 # card configuration
                 card_configuration = self.create_label("Card configuration")
-                card_configuration.place(relx=0.33, rely=0.55, anchor="w")
+                card_configuration.place(relx=0.33, rely=0.48, anchor="w")
                 card_configuration.configure(font=self.make_text_bold())
                 pin_information = self.create_label(f"Wrong PIN counter:[{self.controller.pin_left}], tries remaining.")
-                pin_information.place(relx=0.33, rely=0.6)
+                pin_information.place(relx=0.33, rely=0.52)
 
                 # for a next implementation of 2FA functionality you have the code below
-                '''two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
+                two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
                 two_FA.place(relx=0.33, rely=0.58)
                 if self.controller.two_FA:
                     self.button_2FA = self.create_button("Disable 2FA", None)
                 else:
                     self.button_2FA = self.create_button("Enable 2FA")
-                self.button_2FA.configure(font=self.make_text_size_at(15))
+                self.button_2FA.configure(font=self.make_text_size_at(15), state='disabled')
                 self.button_2FA.place(relx=0.5, rely=0.58)
 
                 # card connectivity
@@ -2443,8 +2443,8 @@ class View(customtkinter.CTk):
                 else:
                     nfc = self.create_label(f"NFC: [BLOCKED]")
                 nfc.place(relx=0.33, rely=0.715)
-                self.button_nfc.configure(font=self.make_text_size_at(15))
-                self.button_nfc.place(relx=0.5, rely=0.71)'''
+                self.button_nfc.configure(font=self.make_text_size_at(15), state='disabled')
+                self.button_nfc.place(relx=0.5, rely=0.71)
 
                 # software information
                 software_information = self.create_label("Software information")
