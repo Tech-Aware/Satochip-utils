@@ -20,18 +20,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python for Linux and Windows
-      if: matrix.os != 'macos-latest'
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-
-    - name: Set up Python for macOS
-      if: matrix.os == 'macos-latest'
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-        architecture: 'arm64'
 
     - name: Install system dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
@@ -43,22 +35,13 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install swig
+        brew install create-dmg
 
-    - name: Install dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        python -m pip install --upgrade pip
-        pip install --no-use-pep517 pyaes==1.6.1
-        pip install -r requirements.txt
-
-    - name: Install dependencies (non-Windows)
-      if: matrix.os != 'windows-latest'
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Install PyInstaller
-      run: pip install pyinstaller
+        pip install pyinstaller
 
     - name: Build executable (Windows)
       if: matrix.os == 'windows-latest'
@@ -66,20 +49,111 @@ jobs:
         pyinstaller --onefile --log-level DEBUG --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
       timeout-minutes: 15
 
-    - name: Build executable (Linux)
+    - name: Build AppImage (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        pyinstaller --onefile --log-level DEBUG --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-      timeout-minutes: 15
+        # Créer le fichier spec personnalisé
+        echo "# -*- mode: python ; coding: utf-8 -*-
 
-    - name: Build executable (macOS)
+        block_cipher = None
+
+        a = Analysis(['satochip_utils.py'],
+                     pathex=['/home/runner/work/Satochip-utils/Satochip-utils'],
+                     binaries=[],
+                     datas=[('pysatochip/pysatochip/cert/*', 'pysatochip/pysatochip/cert'),
+                            ('pictures_db/*', 'pictures_db'),
+                            ('pysatochip/pysatochip/CardConnector.py', 'pysatochip')],
+                     hiddenimports=['PIL._tkinter_finder'],
+                     hookspath=[],
+                     hooksconfig={},
+                     runtime_hooks=[],
+                     excludes=['PIL.ImageCms', 'PIL.ImageDraw', 'PIL.ImageDraw2', 'PIL.ImageEnhance', 'PIL.ImageFile', 'PIL.ImageFilter'],
+                     win_no_prefer_redirects=False,
+                     win_private_assemblies=False,
+                     cipher=block_cipher,
+                     noarchive=False)
+
+        pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+        exe = EXE(pyz,
+                  a.scripts,
+                  a.binaries,
+                  a.zipfiles,
+                  a.datas,
+                  [],
+                  name='satochip_utils',
+                  debug=False,
+                  bootloader_ignore_signals=False,
+                  strip=False,
+                  upx=True,
+                  upx_exclude=[],
+                  runtime_tmpdir=None,
+                  console=True,
+                  disable_windowed_traceback=False,
+                  target_arch=None,
+                  codesign_identity=None,
+                  entitlements_file=None )
+        " > satochip_utils.spec
+
+        # Construire l'exécutable avec le fichier spec personnalisé
+        pyinstaller --log-level DEBUG satochip_utils.spec
+
+        # Installer les outils nécessaires pour créer un AppImage
+        sudo apt-get install -y wget
+        wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+
+        # Créer la structure de répertoires pour AppImage
+        mkdir -p AppDir/usr/bin
+        cp dist/satochip_utils AppDir/usr/bin/
+
+        # Créer le fichier .desktop
+        echo "[Desktop Entry]
+        Name=Satochip Utils
+        Exec=satochip_utils
+        Icon=satochip_utils
+        Type=Application
+        Categories=Utility;" > AppDir/satochip_utils.desktop
+
+        # Créer l'AppImage
+        ./appimagetool-x86_64.AppImage AppDir
+      timeout-minutes: 20
+
+    - name: Build DMG (macOS)
       if: matrix.os == 'macos-latest'
       run: |
         pyinstaller --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-      timeout-minutes: 15
+        # Créer le DMG
+        create-dmg \
+          --volname "Satochip Utils" \
+          --volicon "path/to/your/icon.icns" \
+          --window-pos 200 120 \
+          --window-size 600 300 \
+          --icon-size 100 \
+          --icon "satochip_utils" 200 150 \
+          --hide-extension "satochip_utils" \
+          --app-drop-link 400 150 \
+          "Satochip_Utils.dmg" \
+          "dist/"
+      timeout-minutes: 20
 
-    - name: Upload artifact
+    - name: Upload artifact (Windows)
+      if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.os }}-satochip_utils
-        path: dist/satochip_utils*
+        name: windows-satochip_utils
+        path: dist/satochip_utils.exe
+
+    - name: Upload artifact (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-satochip_utils
+        path: Satochip_Utils-x86_64.AppImage
+
+    - name: Upload artifact (macOS)
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-satochip_utils
+        path: Satochip_Utils.dmg
