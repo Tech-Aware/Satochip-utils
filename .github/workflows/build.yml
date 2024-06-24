@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    timeout-minutes: 45
+    timeout-minutes: 45  # Augmenté pour donner plus de temps
 
     steps:
     - name: Checkout code
@@ -78,7 +78,6 @@ jobs:
         # Créer le DMG
         create-dmg \
           --volname "Satochip Utils" \
-          --volicon "path/to/your/icon.icns" \
           --window-pos 200 120 \
           --window-size 600 300 \
           --icon-size 100 \
