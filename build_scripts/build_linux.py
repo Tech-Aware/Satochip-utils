@@ -31,11 +31,7 @@ def run_pyinstaller():
 
         # Create .desktop file
         with open("AppDir/satochip_utils.desktop", "w") as f:
-            f.write(
-                "[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nIcon=satochip_utils\nCategories=Utility;")
-
-        # Copy icon (assuming you have one, adjust the path as necessary)
-        shutil.copy("path/to/your/icon.png", "AppDir/satochip_utils.png")
+            f.write("[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nCategories=Utility;")
 
         # AppImage command
         appimage_command = [
