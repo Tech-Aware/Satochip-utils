@@ -29,9 +29,13 @@ def run_pyinstaller():
         os.makedirs("AppDir/usr/bin", exist_ok=True)
         shutil.copy("dist/satochip_utils", "AppDir/usr/bin/")
 
+        # Copy default icon
+        shutil.copy("pictures_db/default_icon.png", "AppDir/satochip_utils.png")
+
         # Create .desktop file
         with open("AppDir/satochip_utils.desktop", "w") as f:
-            f.write("[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nCategories=Utility;")
+            f.write(
+                "[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nIcon=satochip_utils\nCategories=Utility;")
 
         # List contents of AppDir
         logger.info("Contents of AppDir:")
