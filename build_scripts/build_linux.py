@@ -33,6 +33,12 @@ def run_pyinstaller():
         with open("AppDir/satochip_utils.desktop", "w") as f:
             f.write("[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nCategories=Utility;")
 
+        # List contents of AppDir
+        logger.info("Contents of AppDir:")
+        for root, dirs, files in os.walk("AppDir"):
+            for file in files:
+                logger.info(os.path.join(root, file))
+
         # AppImage command
         appimage_command = [
             "./appimagetool-x86_64.AppImage",
@@ -40,9 +46,16 @@ def run_pyinstaller():
             "satochip_utils.AppImage"
         ]
 
-        result = subprocess.run(appimage_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # Run AppImage command without check=True to capture output even if it fails
+        result = subprocess.run(appimage_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        logger.info(f"AppImage command exit code: {result.returncode}")
+        logger.info(f"AppImage STDOUT:\n{result.stdout}")
+        logger.info(f"AppImage STDERR:\n{result.stderr}")
+
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(result.returncode, appimage_command, result.stdout, result.stderr)
+
         logger.info("AppImage created successfully.")
-        logger.debug(f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}")
 
     except subprocess.CalledProcessError as e:
         logger.error(f"Command '{e.cmd}' failed with exit status {e.returncode}")
