@@ -1,5 +1,4 @@
 name: Build Executables
-
 on:
   push:
     branches:
@@ -14,14 +13,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    timeout-minutes: 90  # Augmenté à 90 minutes
-
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
 
@@ -37,76 +34,62 @@ jobs:
         brew install swig
         brew install create-dmg
 
+    - name: Install system dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install swig
+        choco install imagemagick
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --no-input -r requirements.txt
-        pip install pyinstaller==5.7.0
+        pip install -r requirements.txt
+
+    - name: Verify Python dependencies
+      run: |
+        python -c "import sys; print('Python version:', sys.version)"
+        python -c "import PIL; print('Pillow version:', PIL.__version__)"
+        python -c "import tkinter; print('Tkinter is installed')"
+        python -c "import cryptography; print('Cryptography version:', cryptography.__version__)"
+        python -c "import ecdsa; print('ECDSA version:', ecdsa.__version__)"
+        python -c "import mnemonic; print('Mnemonic version:', mnemonic.__version__)"
+        python -c "import pyscard; print('PyScard version:', pyscard.__version__)"
+        python -c "import customtkinter; print('CustomTkinter version:', customtkinter.__version__)"
+        python -c "import pyaes; print('PyAES version:', pyaes.__version__)"
+        python -c "import pycparser; print('pycparser version:', pycparser.__version__)"
 
     - name: Build executable (Windows)
       if: matrix.os == 'windows-latest'
-      run: |
-        echo "Starting PyInstaller build..."
-        pyinstaller --log-level DEBUG --onefile --add-data "pysatochip\pysatochip\cert\*;pysatochip/pysatochip/cert" --add-data "pictures_db\*;pictures_db" --add-data "pysatochip\pysatochip\CardConnector.py;pysatochip" satochip_utils.py --name satochip_utils.exe
-        echo "PyInstaller build completed."
-      timeout-minutes: 60
+      run: python build_scripts/build_windows.py
 
-    - name: Build AppImage (Linux)
+    - name: Build executable (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        pyinstaller --log-level DEBUG --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-        wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x appimagetool-x86_64.AppImage
-        mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
-        cp dist/satochip_utils AppDir/usr/bin/
-        # Créer l'icône directement dans AppDir
-        convert -size 256x256 xc:black AppDir/satochip_utils.png
-        echo "[Desktop Entry]
-        Name=Satochip Utils
-        Exec=satochip_utils
-        Icon=satochip_utils
-        Type=Application
-        Categories=Utility;" > AppDir/satochip_utils.desktop
-        ./appimagetool-x86_64.AppImage AppDir
-      timeout-minutes: 40
+        python build_scripts/build_linux.py
 
-    - name: Build DMG (macOS)
+    - name: Build executable (macOS)
       if: matrix.os == 'macos-latest'
-      run: |
-        pyinstaller --log-level DEBUG --onefile --add-data "pysatochip/pysatochip/cert/*:pysatochip/pysatochip/cert" --add-data "pictures_db/*:pictures_db" --add-data "pysatochip/pysatochip/CardConnector.py:pysatochip" satochip_utils.py --name satochip_utils
-        create-dmg \
-          --volname "Satochip Utils" \
-          --window-pos 200 120 \
-          --window-size 600 300 \
-          --icon-size 100 \
-          --icon "satochip_utils" 200 150 \
-          --hide-extension "satochip_utils" \
-          --app-drop-link 400 150 \
-          "Satochip_Utils.dmg" \
-          "dist/"
-        gzip -9 Satochip_Utils.dmg
-      timeout-minutes: 40
+      run: python build_scripts/build_macos.py
 
     - name: Upload artifact (Windows)
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: windows-satochip_utils
         path: dist/satochip_utils.exe
-      timeout-minutes: 15
 
     - name: Upload artifact (Linux)
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-satochip_utils
-        path: Satochip_Utils-x86_64.AppImage
-      timeout-minutes: 15
+        path: satochip_utils.AppImage
 
     - name: Upload artifact (macOS)
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macos-satochip_utils
-        path: Satochip_Utils.dmg.gz
-      timeout-minutes: 15
+        path: dist/Satochip_Utils.dmg
