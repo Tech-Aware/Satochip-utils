@@ -70,6 +70,21 @@ jobs:
         chmod +x appimagetool-x86_64.AppImage
         python build_scripts/build_linux.py
 
+    - name: List AppDir contents (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: ls -R AppDir
+
+    - name: Check executable dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: ldd AppDir/usr/bin/satochip_utils || echo "ldd command failed"
+
+    - name: Upload AppDir for debugging (Linux)
+      if: failure() && matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-appdir
+        path: AppDir/
+
     - name: Build executable (macOS)
       if: matrix.os == 'macos-latest'
       run: python build_scripts/build_macos.py
@@ -82,7 +97,7 @@ jobs:
         path: dist/satochip_utils.exe
 
     - name: Upload artifact (Linux)
-      if: matrix.os == 'ubuntu-latest'
+      if: success() && matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
         name: linux-satochip_utils
