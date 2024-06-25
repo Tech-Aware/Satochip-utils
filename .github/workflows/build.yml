@@ -52,10 +52,10 @@ jobs:
         python -c "import tkinter; print('Tkinter is installed')"
         python -c "import cryptography; print('Cryptography version:', cryptography.__version__)"
         python -c "import ecdsa; print('ECDSA version:', ecdsa.__version__)"
-        python -c "import mnemonic; print('Mnemonic version:', mnemonic.__version__)"
+        python -c "import mnemonic; print('Mnemonic is installed')"
         python -c "import pyscard; print('PyScard version:', pyscard.__version__)"
         python -c "import customtkinter; print('CustomTkinter version:', customtkinter.__version__)"
-        python -c "import pyaes; print('PyAES version:', pyaes.__version__)"
+        python -c "import pyaes; print('PyAES is installed')"
         python -c "import pycparser; print('pycparser version:', pycparser.__version__)"
 
     - name: Build executable (Windows)
