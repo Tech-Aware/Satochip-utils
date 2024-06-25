@@ -1,6 +1,7 @@
 import subprocess
-import logging
 import os
+import logging
+import shutil
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -8,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 def run_pyinstaller():
     try:
-        command = [
+        # PyInstaller command
+        pyinstaller_command = [
             "pyinstaller",
             "--onefile",
             "--name", "satochip_utils",
@@ -18,14 +20,24 @@ def run_pyinstaller():
             "satochip_utils.py"
         ]
 
-        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        logger.info("Build Linux terminé avec succès.")
+        result = subprocess.run(pyinstaller_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True)
+        logger.info("PyInstaller build completed successfully.")
         logger.debug(f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}")
 
-        # Création de l'AppImage
+        # Prepare AppDir
         os.makedirs("AppDir/usr/bin", exist_ok=True)
-        os.system("cp dist/satochip_utils AppDir/usr/bin/")
+        shutil.copy("dist/satochip_utils", "AppDir/usr/bin/")
 
+        # Create .desktop file
+        with open("AppDir/satochip_utils.desktop", "w") as f:
+            f.write(
+                "[Desktop Entry]\nType=Application\nName=Satochip Utils\nExec=satochip_utils\nIcon=satochip_utils\nCategories=Utility;")
+
+        # Copy icon (assuming you have one, adjust the path as necessary)
+        shutil.copy("path/to/your/icon.png", "AppDir/satochip_utils.png")
+
+        # AppImage command
         appimage_command = [
             "./appimagetool-x86_64.AppImage",
             "AppDir",
@@ -33,10 +45,15 @@ def run_pyinstaller():
         ]
 
         result = subprocess.run(appimage_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        logger.info("Création de l'AppImage terminée avec succès.")
+        logger.info("AppImage created successfully.")
         logger.debug(f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}")
+
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Command '{e.cmd}' failed with exit status {e.returncode}")
+        logger.error(f"STDOUT:\n{e.stdout}\nSTDERR:\n{e.stderr}")
+        raise
     except Exception as e:
-        logger.error(f"Erreur lors du build Linux : {e}")
+        logger.error(f"An unexpected error occurred: {str(e)}")
         raise
 
 
