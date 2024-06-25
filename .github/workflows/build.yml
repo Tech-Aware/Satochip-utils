@@ -69,6 +69,16 @@ jobs:
         wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x appimagetool-x86_64.AppImage
         python build_scripts/build_linux.py
+        echo "Content of current directory:"
+        ls -la
+        echo "Content of AppDir:"
+        ls -R AppDir
+
+    - name: Check AppImage tool
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        ./appimagetool-x86_64.AppImage --version
+        file ./appimagetool-x86_64.AppImage
 
     - name: List AppDir contents (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -78,19 +88,12 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: ldd AppDir/usr/bin/satochip_utils || echo "ldd command failed"
 
-    - name: Upload AppDir for debugging (Linux)
-      if: failure() && matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-appdir
-        path: AppDir/
-
     - name: Build executable (macOS)
       if: matrix.os == 'macos-latest'
       run: python build_scripts/build_macos.py
 
     - name: Upload artifact (Windows)
-      if: matrix.os == 'windows-latest'
+      if: success() && matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
         name: windows-satochip_utils
@@ -104,8 +107,25 @@ jobs:
         path: satochip_utils.AppImage
 
     - name: Upload artifact (macOS)
-      if: matrix.os == 'macos-latest'
+      if: success() && matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
         name: macos-satochip_utils
         path: dist/Satochip_Utils.dmg
+
+    - name: Upload AppDir for debugging (Linux)
+      if: failure() && matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-appdir
+        path: AppDir/
+
+    - name: Upload build logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-${{ matrix.os }}
+        path: |
+          *.log
+          build/satochip_utils/warn-satochip_utils.txt
+          build/satochip_utils/xref-satochip_utils.html
