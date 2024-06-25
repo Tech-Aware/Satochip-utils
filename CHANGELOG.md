@@ -26,3 +26,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Syntax calling of self.version to self.app_version
 - Syntax correction in popup and change pin frame
 - Add control for blank, none and Type your passphrase here
+- Correction of version parsing in about

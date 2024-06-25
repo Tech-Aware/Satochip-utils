@@ -113,13 +113,7 @@ class Controller:
                 self.pin_left = card_status['PIN0_remaining_tries']
                 self.two_FA = card_status['needs2FA']
                 self.nfc = self.cc.nfc_policy
-
-                if self.card_type == "Satochip":
-                    self.applet_version = f"MajorVersion: 0.{str(SATOCHIP_PROTOCOL_MAJOR_VERSION)} - MinorVersion: 0.{str(SATOCHIP_PROTOCOL_MINOR_VERSION)}"
-                elif self.card_type == "SeedKeeper":
-                    self.applet_version = f"MajorVersion: 0.{str(SEEDKEEPER_PROTOCOL_MAJOR_VERSION)} - MinorVersion: 0.{str(SEEDKEEPER_PROTOCOL_MINOR_VERSION)}"
-                elif self.card_type == "Satodime":
-                    self.applet_version = f"MajorVersion: 0.{str(SATODIME_PROTOCOL_MAJOR_VERSION)} - MinorVersion:0.{str(SATODIME_PROTOCOL_MINOR_VERSION)}"
+                self.applet_version = f"{card_status['protocol_major_version']}.{card_status['protocol_minor_version']}-{card_status['applet_major_version']}.{card_status['applet_minor_version']}"
 
 
                 # self.card_label = self.cc.card_label
