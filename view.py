@@ -279,7 +279,7 @@ class View(customtkinter.CTk):
                     try:
                         # Créer le bouton avec l'image de l'icône
                         button = customtkinter.CTkButton(header_frame, text=title_text, image=photo_image,
-                                                         font=customtkinter.CTkFont(family="Outfit", size=25,
+                                                         font=customtkinter.CTkFont(family="Arial", size=25,
                                                                                     weight="bold"),
                                                          bg_color="whitesmoke", fg_color="whitesmoke", text_color="black",
                                                          hover_color="whitesmoke", compound="left")
@@ -395,7 +395,7 @@ class View(customtkinter.CTk):
                         logger.debug(f"Creating label with background color: {bg_fg_color}")
                         label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color=bg_fg_color,
                                                        fg_color=bg_fg_color,
-                                                       font=customtkinter.CTkFont(family="Outfit", size=18,
+                                                       font=customtkinter.CTkFont(family="Arial", size=18,
                                                                                   weight="normal"))
                     except Exception as e:
                         logger.warning(f"An error occurred while creating label with background color: {e}",
@@ -405,7 +405,7 @@ class View(customtkinter.CTk):
                         logger.debug(f"Creating label with background color: whitesmoke")
                         label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color="whitesmoke",
                                                        fg_color="whitesmoke",
-                                                       font=customtkinter.CTkFont(family="Outfit", size=18,
+                                                       font=customtkinter.CTkFont(family="Arial", size=18,
                                                                                   weight="normal"))
                     except Exception as e:
                         logger.warning(f"An error occurred while creating label with background color: {e}",
@@ -417,7 +417,7 @@ class View(customtkinter.CTk):
                         logger.debug("Creating default label with transparent background")
                         label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color="transparent",
                                                        fg_color="transparent",
-                                                       font=customtkinter.CTkFont(family="Outfit", size=16,
+                                                       font=customtkinter.CTkFont(family="Arial", size=16,
                                                                                   weight="normal"))
                     except Exception as e:
                         logger.error(f"An error occurred while creating default label: {e}", exc_info=True)
@@ -428,7 +428,7 @@ class View(customtkinter.CTk):
                 try:
                     label = customtkinter.CTkLabel(self.current_frame, text=text, bg_color="transparent",
                                                    fg_color="transparent",
-                                                   font=customtkinter.CTkFont(family="Outfit", size=20,
+                                                   font=customtkinter.CTkFont(family="Arial", size=20,
                                                                               weight="normal"))
                     logger.debug("Default label created due to previous error")
                 except Exception as e:
@@ -452,7 +452,7 @@ class View(customtkinter.CTk):
                     try:
                         logger.debug("Creating button without command")
                         button = customtkinter.CTkButton(self.current_frame, text=text, corner_radius=100,
-                                                         font=customtkinter.CTkFont(family="Outfit", size=18,
+                                                         font=customtkinter.CTkFont(family="Arial", size=18,
                                                                                     weight="normal"),
                                                          bg_color='white', fg_color=MAIN_MENU_COLOR,
                                                          hover_color=HOVER_COLOR, cursor="hand2", width=120, height=35)
@@ -463,7 +463,7 @@ class View(customtkinter.CTk):
                     try:
                         logger.debug("Creating button with command")
                         button = customtkinter.CTkButton(self.current_frame, text=text, corner_radius=100,
-                                                         font=customtkinter.CTkFont(family="Outfit", size=18,
+                                                         font=customtkinter.CTkFont(family="Arial", size=18,
                                                                                     weight="normal"),
                                                          bg_color='white', fg_color=MAIN_MENU_COLOR,
                                                          hover_color=HOVER_COLOR, cursor="hand2", width=120, height=35,
@@ -568,7 +568,7 @@ class View(customtkinter.CTk):
                                                     border_color=BUTTON_COLOR, border_width=1,
                                                     width=400, height=100,
                                                     text_color="grey",
-                                                    font=customtkinter.CTkFont(family="Outfit", size=13,
+                                                    font=customtkinter.CTkFont(family="Arial", size=13,
                                                                                weight="normal"))
                 logger.debug("Textbox created successfully")
                 logger.debug("Exiting create_textbox method successfully")
@@ -701,7 +701,7 @@ class View(customtkinter.CTk):
                 icon_image = Image.open(icon_path)
                 icon = customtkinter.CTkImage(light_image=icon_image, size=(30, 30))
                 icon_label = customtkinter.CTkLabel(popup, image=icon, text=f"\n{msg}", compound='top',
-                                                    font=customtkinter.CTkFont(family="Outfit",
+                                                    font=customtkinter.CTkFont(family="Arial",
                                                                                size=18,
                                                                                weight="normal"))
                 icon_label.pack(pady=(20, 10))  # Ajout d'un padding différent pour l'icône
@@ -709,7 +709,7 @@ class View(customtkinter.CTk):
             else:
                 # Ajout d'un label dans le popup
                 label = customtkinter.CTkLabel(popup, text=msg,
-                                               font=customtkinter.CTkFont(family="Outfit", size=14, weight="bold"))
+                                               font=customtkinter.CTkFont(family="Arial", size=14, weight="bold"))
                 label.pack(pady=20)
                 logger.debug("Label added to popup")
 
@@ -725,7 +725,7 @@ class View(customtkinter.CTk):
                                                        hover_color=HOVER_COLOR,
                                                        bg_color='whitesmoke',
                                                        width=120, height=35, corner_radius=34,
-                                                       font=customtkinter.CTkFont(family="Outfit",
+                                                       font=customtkinter.CTkFont(family="Arial",
                                                                                   size=18,
                                                                                   weight="normal"),
                                                        command=lambda: close_show())
@@ -796,7 +796,7 @@ class View(customtkinter.CTk):
                     logger.info("Setup not done, enabling 'Setup My Card' button")
                     self.create_button_for_main_menu_item(
                         menu_frame,
-                        "Setup My Card",
+                        "Setup my card",
                         "setup_my_card.png",
                         0.26, 0.60,
                         command=lambda: self.setup_my_card_pin(), state='normal'
@@ -806,7 +806,7 @@ class View(customtkinter.CTk):
                         logger.info("Card seeded, enabling 'Setup Seed' button")
                         self.create_button_for_main_menu_item(
                             menu_frame,
-                            "Setup Seed",
+                            "Seed my card",
                             "seed.png",
                             0.26, 0.575,
                             command=lambda: self.setup_my_card_seed(), state='normal'
@@ -815,7 +815,7 @@ class View(customtkinter.CTk):
                         logger.info("Setup completed, disabling 'Setup Done' button")
                         self.create_button_for_main_menu_item(
                             menu_frame,
-                            "Setup Done" if self.card_present else 'Insert Card',
+                            "Setup done" if self.card_present else 'Insert card',
                             "setup_done.jpg" if self.card_present else "insert_card.jpg",
                             0.26, 0.575 if self.card_present else 0.595,
                             command=lambda: None, state='disabled'
@@ -824,7 +824,7 @@ class View(customtkinter.CTk):
                 logger.info("Card not present, setting 'Setup My Card' button state")
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Insert a Card",
+                    "Insert card",
                     "insert_card.jpg",
                     0.26, 0.585,
                     command=lambda: None, state='normal'
@@ -834,7 +834,7 @@ class View(customtkinter.CTk):
                 logger.debug("Enabling 'Change Pin' button")
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Change Pin",
+                    "Change PIN",
                     "change_pin.png",
                     0.33, 0.57,
                     command=lambda: self.change_pin(),
@@ -844,7 +844,7 @@ class View(customtkinter.CTk):
                 logger.info(f"Card type is {self.card_type} | Disabling 'Change Pin' button")
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Change Pin",
+                    "Change PIN",
                     "change_pin_locked.jpg",
                     0.33, 0.57,
                     command=lambda: self.change_pin(),
@@ -854,7 +854,7 @@ class View(customtkinter.CTk):
             if self.setup_done:
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Edit Label",
+                    "Edit label",
                     "edit_label.png",
                     0.40, 0.546,
                     command=lambda: [self.edit_label()], state='normal'
@@ -862,7 +862,7 @@ class View(customtkinter.CTk):
             else:
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Edit Label",
+                    "Edit label",
                     "edit_label_locked.jpg",
                     0.40, 0.546,
                     command=lambda: self.edit_label(), state='disabled'
@@ -879,7 +879,7 @@ class View(customtkinter.CTk):
             if self.setup_done:
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Check Authenticity",
+                    "Check authenticity",
                     "auth.png",
                     0.47, 0.66,
                     command=lambda: [before_check_authenticity(), self.check_authenticity()], state='normal'
@@ -887,7 +887,7 @@ class View(customtkinter.CTk):
             else:
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Check Authenticity",
+                    "Check authenticity",
                     "check_authenticity_locked.jpg",
                     0.47, 0.66,
                     command=lambda: self.check_authenticity(), state='disabled'
@@ -896,7 +896,7 @@ class View(customtkinter.CTk):
                 if self.card_type != "Satodime":
                     self.create_button_for_main_menu_item(
                         menu_frame,
-                        "Reset my Card",
+                        "Reset my card",
                         "reset.png",
                         0.54, 0.595,
                         command=lambda: self.reset_my_card_window(), state='normal'
@@ -904,7 +904,7 @@ class View(customtkinter.CTk):
                 else:
                     self.create_button_for_main_menu_item(
                         menu_frame,
-                        "Reset my Card",
+                        "Reset my card",
                         "reset_locked.png",
                         0.54, 0.595,
                         command=lambda: None, state='disabled'
@@ -926,7 +926,7 @@ class View(customtkinter.CTk):
             else:
                 self.create_button_for_main_menu_item(
                     menu_frame,
-                    "Reset my Card",
+                    "Reset my card",
                     "reset_locked.jpg",
                     0.54, 0.595,
                     command=lambda: None, state='disabled'
@@ -948,7 +948,7 @@ class View(customtkinter.CTk):
 
             self.create_button_for_main_menu_item(
                 menu_frame,
-                "Go to the Webshop",
+                "Go to the webshop",
                 "webshop.png",
                 0.95, 0.67,
                 command=lambda: webbrowser.open("https://satochip.io/shop/", new=2), state='normal'
@@ -1071,7 +1071,7 @@ class View(customtkinter.CTk):
                 icon = customtkinter.CTkImage(light_image=icon_image, size=(20, 20))
                 icon_label = customtkinter.CTkLabel(popup, image=icon, text=f"\nEnter the PIN code of your card.",
                                                     compound='top',
-                                                    font=customtkinter.CTkFont(family="Outfit",
+                                                    font=customtkinter.CTkFont(family="Arial",
                                                                                size=18,
                                                                                weight="normal"))
                 icon_label.pack(pady=(0, 10))  # Ajout d'un padding différent pour l'icône
@@ -1117,7 +1117,7 @@ class View(customtkinter.CTk):
                                                         width=120, height=35, corner_radius=34,
                                                         hover_color=HOVER_COLOR, text="Submit",
                                                         command=submit_passphrase,
-                                                        font=customtkinter.CTkFont(family="Outfit",
+                                                        font=customtkinter.CTkFont(family="Arial",
                                                                                    size=18,
                                                                                    weight="normal")
                                                         )
@@ -1169,7 +1169,7 @@ class View(customtkinter.CTk):
 
             # Ajout d'un label dans le popup
             label = customtkinter.CTkLabel(popup, text="Paste your Seedphrase in the textbox below to verify it",
-                                           font=customtkinter.CTkFont(family="Outfit", size=14, weight="bold"))
+                                           font=customtkinter.CTkFont(family="Arial", size=14, weight="bold"))
             label.pack(pady=20)
             logger.debug("Label added to popup")
 
@@ -1179,7 +1179,7 @@ class View(customtkinter.CTk):
                                                 border_color=BUTTON_COLOR, border_width=1,
                                                 width=300, height=100,
                                                 text_color="grey",
-                                                font=customtkinter.CTkFont(family="Outfit", size=13, weight="normal"))
+                                                font=customtkinter.CTkFont(family="Arial", size=13, weight="normal"))
             text_box.pack(pady=20)
             logger.debug("Textbox added to popup")
 
@@ -1494,7 +1494,7 @@ class View(customtkinter.CTk):
 
             try:
                 logger.debug("Creating header")
-                self.header = View.create_an_header(self, "Seed My Card", "seed_popup.jpg")
+                self.header = View.create_an_header(self, "Seed my card", "seed_popup.jpg")
                 self.header.place(relx=0.32, rely=0.05, anchor="nw")
                 logger.debug("Header created and placed")
             except Exception as e:
@@ -1597,7 +1597,7 @@ class View(customtkinter.CTk):
                 radio_button_import_seed = customtkinter.CTkRadioButton(self.current_frame,
                                                                         text="I already have a seedphrase",
                                                                         variable=radio_value, value="import",
-                                                                        font=customtkinter.CTkFont(family="Outfit",
+                                                                        font=customtkinter.CTkFont(family="Arial",
                                                                                                    size=14,
                                                                                                    weight="normal"),
                                                                         bg_color="whitesmoke", fg_color="green",
@@ -1608,7 +1608,7 @@ class View(customtkinter.CTk):
                 radio_button_generate = customtkinter.CTkRadioButton(self.current_frame,
                                                                      text="I want to generate a new seedphrase",
                                                                      variable=radio_value, value="generate",
-                                                                     font=customtkinter.CTkFont(family="Outfit",
+                                                                     font=customtkinter.CTkFont(family="Arial",
                                                                                                 size=14,
                                                                                                 weight="normal"),
                                                                      bg_color="whitesmoke", fg_color="green",
@@ -1621,7 +1621,7 @@ class View(customtkinter.CTk):
                                                                               variable=radio_value_mnemonic,
                                                                               value="generate_12",
                                                                               font=customtkinter.CTkFont(
-                                                                                  family="Outfit",
+                                                                                  family="Arial",
                                                                                   size=14,
                                                                                   weight="normal"),
                                                                               bg_color="whitesmoke", fg_color="green",
@@ -1631,7 +1631,7 @@ class View(customtkinter.CTk):
                                                                               text="24 - words",
                                                                               variable=radio_value_mnemonic, value="generate_24",
                                                                               font=customtkinter.CTkFont(
-                                                                                  family="Outfit",
+                                                                                  family="Arial",
                                                                                   size=14,
                                                                                   weight="normal"),
                                                                               bg_color="whitesmoke", fg_color="green",
@@ -1641,7 +1641,7 @@ class View(customtkinter.CTk):
                                                                        text="Add a passphrase (optional)",
                                                                        variable=radio_value_passphrase,
                                                                        value="passphrase",
-                                                                       font=customtkinter.CTkFont(family="Outfit",
+                                                                       font=customtkinter.CTkFont(family="Arial",
                                                                                                   size=14,
                                                                                                   weight="normal"),
                                                                        bg_color="whitesmoke", fg_color="green",
@@ -1672,7 +1672,7 @@ class View(customtkinter.CTk):
                                                          border_color=BUTTON_COLOR, border_width=1,
                                                          width=557, height=83,
                                                          text_color="grey",
-                                                         font=customtkinter.CTkFont(family="Outfit", size=13,
+                                                         font=customtkinter.CTkFont(family="Arial", size=13,
                                                                                     weight="normal"))
 
                 self.cancel_button = View.create_button(self, "Back",
@@ -1850,7 +1850,7 @@ class View(customtkinter.CTk):
             try:
                 logger.debug("Creating header")
 
-                header_conditional_title = "Edit Label"
+                header_conditional_title = "Edit label"
                 header_conditional_label = f"Find a friendly name for your {self.card_type} Card."
 
                 self.header = View.create_an_header(self,
@@ -1977,7 +1977,7 @@ class View(customtkinter.CTk):
                         icon_label = customtkinter.CTkLabel(self.current_frame, image=icon,
                                                             text=f"Your card is authentic. ",
                                                             compound='right', bg_color="whitesmoke", fg_color="whitesmoke",
-                                                            font=customtkinter.CTkFont(family="Outfit",
+                                                            font=customtkinter.CTkFont(family="Arial",
                                                                                        size=18,
                                                                                        weight="normal"))
                         icon_label.place(relx=0.4, rely=0.267, anchor="w")
@@ -1990,7 +1990,7 @@ class View(customtkinter.CTk):
                         icon_label = customtkinter.CTkLabel(self.current_frame, image=icon,
                                                             text=f"Your card is not authentic. ",
                                                             compound='right', bg_color="whitesmoke", fg_color="whitesmoke",
-                                                            font=customtkinter.CTkFont(family="Outfit",
+                                                            font=customtkinter.CTkFont(family="Arial",
                                                                                        size=18,
                                                                                        weight="normal"))
                         icon_label.place(relx=0.4, rely=0.267, anchor="w")
@@ -2017,7 +2017,7 @@ class View(customtkinter.CTk):
                                                                         text="Root CA certificate",
                                                                         variable=certificate_radio_value,
                                                                         value="root_ca_certificate",
-                                                                        font=customtkinter.CTkFont(family="Outfit",
+                                                                        font=customtkinter.CTkFont(family="Arial",
                                                                                                    size=14,
                                                                                                    weight="normal"),
                                                                         bg_color="whitesmoke", fg_color="green",
@@ -2029,7 +2029,7 @@ class View(customtkinter.CTk):
                                                                        text="Sub CA certificate",
                                                                        variable=certificate_radio_value,
                                                                        value="sub_ca_certificate",
-                                                                       font=customtkinter.CTkFont(family="Outfit",
+                                                                       font=customtkinter.CTkFont(family="Arial",
                                                                                                   size=14,
                                                                                                   weight="normal"),
                                                                        bg_color="whitesmoke", fg_color="green",
@@ -2041,7 +2041,7 @@ class View(customtkinter.CTk):
                                                                        text="Device certificate",
                                                                        variable=certificate_radio_value,
                                                                        value="device_certificate",
-                                                                       font=customtkinter.CTkFont(family="Outfit",
+                                                                       font=customtkinter.CTkFont(family="Arial",
                                                                                                   size=14,
                                                                                                   weight="normal"),
                                                                        bg_color="whitesmoke", fg_color="green",
@@ -2059,7 +2059,7 @@ class View(customtkinter.CTk):
                                                          border_color=BUTTON_COLOR, border_width=0,
                                                          width=581, height=228 if is_authentic else 150,
                                                          text_color="grey",
-                                                         font=customtkinter.CTkFont(family="Outfit", size=13,
+                                                         font=customtkinter.CTkFont(family="Arial", size=13,
                                                                                     weight="normal"))
                 logger.debug("Text box set up")
 
@@ -2202,7 +2202,7 @@ class View(customtkinter.CTk):
 
             try:
                 logger.info("Creating header")
-                self.header = View.create_an_header(self, f"Reset Your {self.controller.card_type}", "reset_popup.jpg")
+                self.header = View.create_an_header(self, f"Reset your {self.controller.card_type}", "reset_popup.jpg")
                 self.header.place(relx=0.32, rely=0.05, anchor="nw")
                 logger.debug("Header created and placed")
 
@@ -2236,7 +2236,7 @@ class View(customtkinter.CTk):
                 logger.info("Creating counter label")
                 self.counter_label = customtkinter.CTkLabel(self, text="Card isn't reset actually",
                                                             bg_color='white', fg_color='white',
-                                                            font=customtkinter.CTkFont(family="Outfit",
+                                                            font=customtkinter.CTkFont(family="Arial",
                                                                                        size=30,
                                                                                        weight="bold"))
                 # self.counter_label.place(relx=0.25, rely=0.53, anchor='w')
