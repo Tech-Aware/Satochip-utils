@@ -502,7 +502,9 @@ class View(customtkinter.CTk):
 
             try:
                 logger.debug(f"Creating button with label: {button_label}")
-                button = customtkinter.CTkButton(frame, text=button_label, image=photo_image,
+                button = customtkinter.CTkButton(frame, text=button_label, font=customtkinter.CTkFont(family="Outfit",
+                                                                                                      weight="normal"),
+                                                 image=photo_image,
                                                  bg_color=MAIN_MENU_COLOR, fg_color=MAIN_MENU_COLOR,
                                                  hover_color=MAIN_MENU_COLOR, compound="left", cursor="hand2",
                                                  command=command, state=state)
@@ -812,7 +814,7 @@ class View(customtkinter.CTk):
                             menu_frame,
                             "Setup done" if self.card_present else 'Insert card',
                             "setup_done.jpg" if self.card_present else "insert_card.jpg",
-                            0.26, 0.564 if self.card_present else 0.55,
+                            0.26, 0.564 if self.card_present else 0.545,
                             command=lambda: None, state='disabled'
                         )
             else:
@@ -821,7 +823,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Insert card",
                     "insert_card.jpg",
-                    0.26, 0.55,
+                    0.26, 0.545,
                     command=lambda: None, state='normal'
                 )
 
@@ -831,7 +833,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Change PIN",
                     "change_pin.png",
-                    0.33, 0.567,
+                    0.33, 0.56,
                     command=lambda: self.change_pin(),
                     state='normal'
                 )
@@ -841,7 +843,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Change PIN",
                     "change_pin_locked.jpg",
-                    0.33, 0.567,
+                    0.33, 0.56,
                     command=lambda: self.change_pin(),
                     state='disabled'
                 )
@@ -851,7 +853,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Edit label",
                     "edit_label.png",
-                    0.40, 0.532,
+                    0.40, 0.525,
                     command=lambda: [self.edit_label()], state='normal'
                 )
             else:
@@ -859,7 +861,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Edit label",
                     "edit_label_locked.jpg",
-                    0.40, 0.532,
+                    0.40, 0.527,
                     command=lambda: self.edit_label(), state='disabled'
                 )
 
@@ -884,7 +886,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Check authenticity",
                     "check_authenticity_locked.jpg",
-                    0.47, 0.657,
+                    0.47, 0.66,
                     command=lambda: self.check_authenticity(), state='disabled'
                 )
             if self.card_present:
@@ -908,7 +910,7 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "About",
                     "about.jpg",
-                    rel_y=0.73, rel_x=0.50,
+                    rel_y=0.73, rel_x=0.489,
                     command=lambda: self.about(), state='normal'
                 )
                 '''self.create_button_for_main_menu_item(
@@ -923,14 +925,14 @@ class View(customtkinter.CTk):
                     menu_frame,
                     "Reset my card",
                     "reset_locked.jpg",
-                    0.54, 0.595,
+                    0.54, 0.593,
                     command=lambda: None, state='disabled'
                 )
                 self.create_button_for_main_menu_item(
                     menu_frame,
                     "About",
                     "about_locked.jpg",
-                    rel_y=0.73, rel_x=0.50,
+                    rel_y=0.73, rel_x=0.488,
                     command=lambda: self.about(), state='disabled'
                 )
                 '''self.create_button_for_main_menu_item(
