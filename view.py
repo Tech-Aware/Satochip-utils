@@ -7,6 +7,7 @@ import customtkinter
 from customtkinter import CTkImage
 import webbrowser
 from PIL import Image, ImageTk
+from pysatochip.version import PYSATOCHIP_VERSION
 
 from controller import Controller
 
@@ -557,29 +558,6 @@ class View(customtkinter.CTk):
             logger.error(f"An unexpected error occurred in create_entry: {e}", exc_info=True)
             return None
 
-    def create_textbox(self) -> customtkinter.CTkTextbox:
-        try:
-            logger.debug("Entering create_textbox method")
-
-            try:
-                logger.debug("Creating textbox with specific properties")
-                text_box = customtkinter.CTkTextbox(self.current_frame, corner_radius=5,
-                                                    bg_color=BUTTON_COLOR, fg_color="white",
-                                                    border_color=BUTTON_COLOR, border_width=1,
-                                                    width=400, height=100,
-                                                    text_color="grey",
-                                                    font=customtkinter.CTkFont(family="Outfit", size=13,
-                                                                               weight="normal"))
-                logger.debug("Textbox created successfully")
-                logger.debug("Exiting create_textbox method successfully")
-                return text_box
-            except Exception as e:
-                logger.error(f"An error occurred while creating the textbox: {e}", exc_info=True)
-                raise
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in create_textbox: {e}", exc_info=True)
-            return None
-
     def update_textbox(self, text):
         try:
             logger.debug("Entering update_textbox method")
@@ -687,6 +665,7 @@ class View(customtkinter.CTk):
 
             # Rendre la fenêtre modale
             popup.transient(self)  # Set to be on top of the main window
+            popup.wait_visibility() # patch _tkinter.TclError: grab failed: window not viewable
             popup.grab_set()  # Grab all events
             logger.debug("Popup set to be modal")
 
@@ -738,19 +717,6 @@ class View(customtkinter.CTk):
         except Exception as e:
             logger.error(f"An error occurred in show: {e}", exc_info=True)
             raise
-
-    def set_popup_focus(self, popup):
-        try:
-            logger.debug("Entering set_popup_focus method")
-            try:
-                popup.focus_set()
-                logger.debug("Popup focus set successfully")
-            except _tkinter.TclError as e:
-                logger.error(f"Error setting focus to popup: {e}", exc_info=True)
-                raise
-            logger.debug("Exiting set_popup_focus method successfully")
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in set_popup_focus: {e}", exc_info=True)
 
     #################
     """ MAIN MENU """
@@ -965,8 +931,33 @@ class View(customtkinter.CTk):
 
     def update_status(self, isConnected=None):
         try:
-            logger.info("CC UTILS: View.update_status | Entering update_status method")
-            if isConnected is not None:
+            if self.controller.cc.mode_factory_reset == True:
+                # we are in factory reset mode
+                if isConnected is True:
+                    logger.info(f"Card inserted for Reset Factory!")
+                    try:
+                        # Mettre à jour les labels et les boutons en fonction de l'insertion de la carte
+                        # self.reset_button.configure(text='Reset', state='normal')
+                        self.show_button.configure(text='Reset', state='normal')
+                        logger.debug("Labels and button updated for card insertion")
+                    except Exception as e:
+                        logger.error(f"An error occurred while updating labels and button for card insertion: {e}",
+                                     exc_info=True)
+
+                elif isConnected is False:
+                    logger.info(f"Card removed for Reset Factory!")
+                    try:
+                        # Mettre à jour les labels et les boutons en fonction du retrait de la carte
+                        self.show_button.configure(text='Insert', state='disabled')
+                        logger.debug("Labels and button updated for card removal")
+                    except Exception as e:
+                        logger.error(f"An error occurred while updating labels and button for card removal: {e}",
+                                     exc_info=True)
+                else:  # None
+                    pass
+            else:
+                # normal mode
+                logger.info("CC UTILS: View.update_status | Entering update_status method")
                 if isConnected is True:
                     try:
                         logger.info("Getting card status")
@@ -1012,35 +1003,34 @@ class View(customtkinter.CTk):
                         logger.info(f"Card type: {self.card_type}")
                         logger.info(f"Card label: {self.card_label}")
                         logger.info(f"Tries remaining:: {self.pin_left}")
-
                         if self.app_open:
                             self.start_setup()
 
-
                     except Exception as e:
                         logger.error(f"An error occurred while resetting card status: {e}", exc_info=True)
-                logger.info("Exiting update_status method successfully")
-            else:
-                try:
-                    logger.info("Getting card status")
-                    (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                     self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
-                    logger.info("Card status retrieved successfully")
+                    logger.info("Exiting update_status method successfully")
 
-                    self.controller.card_event = True
-                    logger.debug("Controller card event set to True")
+                else: # isConnected is None
+                    try:
+                        logger.info("Getting card status")
+                        (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
+                         self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
+                        logger.info("Card status retrieved successfully")
 
-                    logger.info(f"Card presence: {self.card_present}")
-                    logger.info(f"Applet major version: {self.card_version}")
-                    logger.info(f"Needs 2FA: {self.needs2FA}")
-                    logger.info(f"Is seeded: {self.is_seeded}")
-                    logger.info(f"Setup done: {self.setup_done}")
-                    logger.info(f"Card type: {self.card_type}")
-                    logger.info(f"Card label: {self.card_label}")
-                    logger.info(f"Tries remaining:: {self.pin_left}")
+                        self.controller.card_event = True
+                        logger.debug("Controller card event set to True")
 
-                except Exception as e:
-                    logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
+                        logger.info(f"Card presence: {self.card_present}")
+                        logger.info(f"Applet major version: {self.card_version}")
+                        logger.info(f"Needs 2FA: {self.needs2FA}")
+                        logger.info(f"Is seeded: {self.is_seeded}")
+                        logger.info(f"Setup done: {self.setup_done}")
+                        logger.info(f"Card type: {self.card_type}")
+                        logger.info(f"Card label: {self.card_label}")
+                        logger.info(f"Tries remaining:: {self.pin_left}")
+
+                    except Exception as e:
+                        logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
         except Exception as e:
             logger.error(f"An unexpected error occurred in update_status method: {e}", exc_info=True)
 
@@ -1208,6 +1198,7 @@ class View(customtkinter.CTk):
 
             # Configuration du comportement modal de la fenêtre popup
             popup.transient(self)
+            popup.wait_visibility()  # patch _tkinter.TclError: grab failed: window not viewable
             popup.grab_set()
             popup.focus_set()
             logger.debug("Popup window configured for modal behavior")
@@ -2087,31 +2078,31 @@ class View(customtkinter.CTk):
         except Exception as e:
             logger.error(f"An unexpected error occurred in check_authenticity: {e}", exc_info=True)
 
-    def card_inserted(self, atr):
-        try:
-            logger.info(f"Card inserted for Reset Factory with ATR: {atr}")
-            try:
-                # Mettre à jour les labels et les boutons en fonction de l'insertion de la carte
-                # self.reset_button.configure(text='Reset', state='normal')
-                self.show_button.configure(text='Reset', state='normal')
-                logger.debug("Labels and button updated for card insertion")
-            except Exception as e:
-                logger.error(f"An error occurred while updating labels and button for card insertion: {e}",
-                             exc_info=True)
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in card_inserted: {e}", exc_info=True)
+    # def card_inserted(self, atr):
+    #     try:
+    #         logger.info(f"Card inserted for Reset Factory with ATR: {atr}")
+    #         try:
+    #             # Mettre à jour les labels et les boutons en fonction de l'insertion de la carte
+    #             # self.reset_button.configure(text='Reset', state='normal')
+    #             self.show_button.configure(text='Reset', state='normal')
+    #             logger.debug("Labels and button updated for card insertion")
+    #         except Exception as e:
+    #             logger.error(f"An error occurred while updating labels and button for card insertion: {e}",
+    #                          exc_info=True)
+    #     except Exception as e:
+    #         logger.error(f"An unexpected error occurred in card_inserted: {e}", exc_info=True)
 
-    def card_removed(self, atr):
-        try:
-            logger.info(f"Card removed with ATR: {atr}")
-            try:
-                # Mettre à jour les labels et les boutons en fonction du retrait de la carte
-                self.show_button.configure(text='Insert', state='disabled')
-                logger.debug("Labels and button updated for card removal")
-            except Exception as e:
-                logger.error(f"An error occurred while updating labels and button for card removal: {e}", exc_info=True)
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in card_removed: {e}", exc_info=True)
+    # def card_removed(self, atr):
+    #     try:
+    #         logger.info(f"Card removed with ATR: {atr}")
+    #         try:
+    #             # Mettre à jour les labels et les boutons en fonction du retrait de la carte
+    #             self.show_button.configure(text='Insert', state='disabled')
+    #             logger.debug("Labels and button updated for card removal")
+    #         except Exception as e:
+    #             logger.error(f"An error occurred while updating labels and button for card removal: {e}", exc_info=True)
+    #     except Exception as e:
+    #         logger.error(f"An unexpected error occurred in card_removed: {e}", exc_info=True)
 
     def click_reset_button(self):
         try:
@@ -2124,7 +2115,8 @@ class View(customtkinter.CTk):
 
             try:
                 logger.info("Calling controller.cc.card_reset_factory()")
-                (response, sw1, sw2) = self.controller.card_transmit_reset()
+                #(response, sw1, sw2) = self.controller.card_transmit_reset()
+                (response, sw1, sw2) = self.controller.cc.card_reset_factory_signal()
                 logger.info(f"card_reset_factory response: {hex(256 * sw1 + sw2)}")
             except Exception as e:
                 logger.error(f"An error occurred during card_reset_factory call: {e}", exc_info=True)
@@ -2133,8 +2125,9 @@ class View(customtkinter.CTk):
             try:
                 if sw1 == 0xFF and sw2 == 0x00:
                     logger.info("Factory reset successful. Disconnecting the card.")
-                    self.controller.cc.card_factory_disconnect()
-                    msg = 'The card has been factory reset\nRemaining counter: 0'
+                    #self.controller.cc.card_factory_disconnect()
+                    self.controller.cc.card_disconnect()
+                    msg = 'The card has been reset to factory\nRemaining counter: 0'
                     self.show('SUCCESS', msg, "Ok", lambda: self.restart_app(),
                               "./pictures_db/icon_reset_popup.jpg")
                     logger.info("Card has been reset to factory. Counter set to 0.")
@@ -2142,7 +2135,7 @@ class View(customtkinter.CTk):
                     logger.info("Factory reset aborted. The card must be removed after each reset.")
                     msg = 'RESET ABORTED!\n Remaining counter: MAX.'
                     self.show('ABORTED', msg, "Ok",
-                              lambda: [self.controller.cc.card_switch_to_main_observer(), self.start_setup()],
+                              lambda: [self.controller.cc.set_mode_factory_reset(False), self.start_setup()],
                               "./pictures_db/icon_reset_popup.jpg")
                     logger.info("Reset aborted. Counter set to MAX.")
                 elif sw1 == 0xFF and sw2 > 0x00:
@@ -2172,7 +2165,8 @@ class View(customtkinter.CTk):
             logger.error(f"An unexpected error occurred during the factory reset process: {e}", exc_info=True)
 
     def reset_my_card_window(self):
-        self.controller.cc.card_switch_to_factory_observer()
+        #self.controller.cc.card_switch_to_factory_observer()
+        self.controller.cc.set_mode_factory_reset(True)
 
         self.in_reset_card = 'display'
         logger.info(f'in reset card: {self.in_reset_card}')
@@ -2247,24 +2241,30 @@ class View(customtkinter.CTk):
             try:
                 logger.info("Creating quit button")
 
-                def click_quit_button():
+                def click_cancel_button():
                     try:
                         logger.info("Executing quit button action")
-                        self.controller.cc.card_switch_to_main_observer()
-                        time.sleep(0.5)
+                        self.controller.cc.set_mode_factory_reset(False)
+                        time.sleep(0.5) # todo remove?
                         self.start_setup()
-
                     except Exception as e:
                         logger.error(f"An error occurred while quitting and redirecting: {e}", exc_info=True)
 
-                logger.debug("Quit button created and placed")
+                def click_start_button():
+                    try:
+                        msg = f"Please follow the instruction bellow."
+                        self.show('IN PROGRESS', msg, "Remove", lambda: self.click_reset_button(),
+                                  "./pictures_db/icon_reset_popup.jpg")
+                    except Exception as e:
+                        logger.error(f"An error occurred while quitting and redirecting: {e}", exc_info=True)
+
                 self.cancel_button = View.create_button(self, 'Cancel',
-                                                        lambda: click_quit_button())
+                                                        lambda: click_cancel_button())
                 self.cancel_button.place(relx=0.7, rely=0.9, anchor="w")
 
                 self.reset_button = View.create_button(self,
-                                                       'Reset',
-                                                       lambda: self.click_reset_button())
+                                                       'Start',
+                                                       lambda: click_start_button())
                 self.reset_button.place(relx=0.85, rely=0.9, anchor="w")
 
                 main_menu = self.main_menu()
@@ -2281,35 +2281,8 @@ class View(customtkinter.CTk):
         except Exception as e:
             logger.error(f"An unexpected error occurred in reset_my_card_window: {e}", exc_info=True)
 
-    def click_abort(self):
-        try:
-            logger.info("click abort")
-            try:
-                msg = 'RESET ABORT'
-                self.reset_card_label.configure(text=msg, text_color='red')
-                logger.debug("Reset card label updated to indicate abort")
-            except Exception as e:
-                logger.error(f"An error occurred while updating reset card label: {e}", exc_info=True)
-
-            try:
-                self.counter = "Remaining counter: MAX"
-                self.counter_label.configure(text=self.counter)
-                logger.debug("Counter label updated to MAX")
-            except Exception as e:
-                logger.error(f"An error occurred while updating counter label: {e}", exc_info=True)
-
-            try:
-                response, sw1, sw2, d = self.controller.cc.card_get_status()
-                logger.info("RESET ABORTED: " + str(hex(256 * sw1 + sw2)))
-                logger.debug(f"Card status retrieved: response={response}, sw1={sw1}, sw2={sw2}, d={d}")
-            except Exception as e:
-                logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
-        except Exception as e:
-            logger.error(f"An unexpected error occurred in click_abort: {e}", exc_info=True)
-
     def about(self):
 
-        from pysatochip.pysatochip.version import PYSATOCHIP_VERSION
         try:
             logger.info("IN View.edit_label() | Entering edit_label method")
             frame_name = "edit_label"
@@ -2454,21 +2427,6 @@ class View(customtkinter.CTk):
                 self.app_version.place(relx=0.33, rely=0.83)
                 self.pysatochip_version = self.create_label(f"Pysatochip version: {PYSATOCHIP_VERSION}")
                 self.pysatochip_version.place(relx=0.33, rely=0.88)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 self.back_button = View.create_button(self,
                                                        'Back',
                                                        lambda: switch_unlock_to_false_and_quit())
