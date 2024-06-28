@@ -1597,13 +1597,11 @@ class View(customtkinter.CTk):
                                                         )
 
                 self.finish_button = View.create_button(self, "Import",
-                                                        command=lambda: self.controller.handle_user_action(
-                                                            frame_concerned="setup_my_card_seed",
-                                                            button_clicked="import_seed_button",
-                                                            first_entry_value=self.text_box.get(1.0, "end-1c"),
-                                                            second_entry_value="passphrase" if generate_with_passphrase else None,
-                                                            third_entry_value=passphrase_entry.get()
+                                                        command=lambda: self.controller.import_seed(
+                                                            self.text_box.get(1.0, "end-1c"),
+                                                            passphrase_entry.get() if generate_with_passphrase else None,
                                                         ))
+
                 logger.debug("Radio buttons and entry fields set up")
 
             except Exception as e:

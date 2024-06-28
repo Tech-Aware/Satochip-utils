@@ -176,6 +176,35 @@ class Controller:
             logger.error(f"generate_random_seed: Error generating seed: {e}")
             return f"Exception: {e}"
 
+    def import_seed(self, mnemonic, passphrase =None):
+        """Import a seed (and optional passphrase) into a Satochip"""
+        try:
+            MNEMONIC = Mnemonic(language="english")
+            if MNEMONIC.check(mnemonic):  # check that seed is valid
+                logger.info("Imported seed is valid.")
+                if passphrase is not None:
+                    if passphrase in ["", " ", "Type your passphrase here"]:
+                        logger.error("Passphrase is blank or empy")
+                        self.view.show('WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
+                    else:
+                        seed = Mnemonic.to_seed(mnemonic, passphrase)
+                        self.card_setup_native_seed(seed)
+                else:
+                    seed = Mnemonic.to_seed(mnemonic)
+                    self.card_setup_native_seed(seed)
+            else:
+                logger.warning("Imported seed is invalid!")
+                self.view.show('WARNING',
+                               "Warning!\nInvalid BIP39 seedphrase, please retry.",
+                               'Ok', None,
+                               "./pictures_db/icon_seed_popup.jpg")
+
+        except Exception as e:
+            logger.error(f"Error while importing seed: {e}")
+            self.view.show("ERROR", "Failed to import seed.", "Ok", None,
+                           "./pictures_db/icon_seed_popup.jpg")
+
+
     def handle_user_action(self,
                            frame_concerned,
                            button_clicked=None,
@@ -235,9 +264,9 @@ class Controller:
             if frame_concerned == "setup_my_card_seed":
                 #from mnemonic import Mnemonic
 
-                if button_clicked == "Cancel":
-                    logger.info("Setup my card seed: Cancelled by user.")
-                    self.view.start_setup()
+                # if button_clicked == "Cancel":
+                #     logger.info("Setup my card seed: Cancelled by user.")
+                #     self.view.start_setup()
 
                 # elif button_clicked == "generate_seed_button":
                 #     try:
@@ -277,45 +306,45 @@ class Controller:
                 #         self.view.show("ERROR", "Failed to generate seed.", 'ok', None,
                 #                        "./pictures_db/icon_seed_popup.jpg")
 
-                elif button_clicked == "import_seed_button":
-                    try:
-                        MNEMONIC = Mnemonic(language="english")
-                        if first_entry_value is not None:
-                            mnemonic = first_entry_value
-                            passphrase = third_entry_value if second_entry_value is not None else None
-                            logger.info(f"Seed to import: {mnemonic}, passphrase: {passphrase}")
-                            if MNEMONIC.check(mnemonic):  # check that seed is valid
-                                logger.info("Imported seed is valid.")
-                                if passphrase is not None:
-                                    if passphrase in ["", " ", "Type your passphrase here"]:
-                                        logger.error("Passphrase is blank or empy")
-                                        self.view.show('WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
-                                    else:
-                                        seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
-                                        logger.info(f"seed:{seed}")
-                                        logger.info(f"mnemonic: {mnemonic}")
-                                        logger.info(f"passphrase: {passphrase}")
-                                        self.card_setup_native_seed(seed)
-                                else:
-                                    seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
-                                    logger.info(f"seed:{seed}")
-                                    logger.info(f"mnemonic: {mnemonic}")
-                                    logger.info(f"passphrase: {passphrase}")
-                                    self.card_setup_native_seed(seed)
-                            else:
-                                logger.warning("Imported seed is invalid.")
-                                self.view.show('WARNING',
-                                               "Warning!\nInvalid BIP39 seedphrase, please retry.",
-                                               'Ok',
-                                               None,
-                                               "./pictures_db/icon_seed_popup.jpg")
+                # if button_clicked == "import_seed_button":
+                #     try:
+                #         MNEMONIC = Mnemonic(language="english")
+                #         if first_entry_value is not None:
+                #             mnemonic = first_entry_value
+                #             passphrase = third_entry_value if second_entry_value is not None else None
+                #             logger.info(f"Seed to import: {mnemonic}, passphrase: {passphrase}")
+                #             if MNEMONIC.check(mnemonic):  # check that seed is valid
+                #                 logger.info("Imported seed is valid.")
+                #                 if passphrase is not None:
+                #                     if passphrase in ["", " ", "Type your passphrase here"]:
+                #                         logger.error("Passphrase is blank or empy")
+                #                         self.view.show('WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
+                #                     else:
+                #                         seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
+                #                         logger.info(f"seed:{seed}")
+                #                         logger.info(f"mnemonic: {mnemonic}")
+                #                         logger.info(f"passphrase: {passphrase}")
+                #                         self.card_setup_native_seed(seed)
+                #                 else:
+                #                     seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
+                #                     logger.info(f"seed:{seed}")
+                #                     logger.info(f"mnemonic: {mnemonic}")
+                #                     logger.info(f"passphrase: {passphrase}")
+                #                     self.card_setup_native_seed(seed)
+                #             else:
+                #                 logger.warning("Imported seed is invalid.")
+                #                 self.view.show('WARNING',
+                #                                "Warning!\nInvalid BIP39 seedphrase, please retry.",
+                #                                'Ok',
+                #                                None,
+                #                                "./pictures_db/icon_seed_popup.jpg")
+                #
+                #     except Exception as e:
+                #         logger.error(f"Error importing seed: {e}")
+                #         self.view.show("ERROR", "Failed to import seed.", "Ok", None,
+                #                        "./pictures_db/icon_seed_popup.jpg")
 
-                    except Exception as e:
-                        logger.error(f"Error importing seed: {e}")
-                        self.view.show("ERROR", "Failed to import seed.", "Ok", None,
-                                       "./pictures_db/icon_seed_popup.jpg")
-
-                elif button_clicked == "Finish":
+                if button_clicked == "Finish":
                     try:
                         MNEMONIC = Mnemonic(language="english")
                         if first_entry_value is not None:
