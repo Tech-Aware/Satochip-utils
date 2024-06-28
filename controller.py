@@ -443,9 +443,9 @@ class Controller:
                         msg = "PIN must have at least 4 characters."
                         self.view.show("INFO", msg, 'Ok', None,
                                        "./pictures_db/icon_change_pin_popup.jpg")
-                    elif len(pin) > 64:
-                        logger.warning("PIN length is more than 64 characters")
-                        msg = "PIN must have less than 64 characters."
+                    elif len(pin) > 16:
+                        logger.warning("PIN length is more than 16 characters")
+                        msg = "PIN must have maximum 16 characters."
                         self.view.show("INFO", msg, 'Ok', None,
                                        "./pictures_db/icon_change_pin_popup.jpg")
                     else:
