@@ -2078,32 +2078,6 @@ class View(customtkinter.CTk):
         except Exception as e:
             logger.error(f"An unexpected error occurred in check_authenticity: {e}", exc_info=True)
 
-    # def card_inserted(self, atr):
-    #     try:
-    #         logger.info(f"Card inserted for Reset Factory with ATR: {atr}")
-    #         try:
-    #             # Mettre à jour les labels et les boutons en fonction de l'insertion de la carte
-    #             # self.reset_button.configure(text='Reset', state='normal')
-    #             self.show_button.configure(text='Reset', state='normal')
-    #             logger.debug("Labels and button updated for card insertion")
-    #         except Exception as e:
-    #             logger.error(f"An error occurred while updating labels and button for card insertion: {e}",
-    #                          exc_info=True)
-    #     except Exception as e:
-    #         logger.error(f"An unexpected error occurred in card_inserted: {e}", exc_info=True)
-
-    # def card_removed(self, atr):
-    #     try:
-    #         logger.info(f"Card removed with ATR: {atr}")
-    #         try:
-    #             # Mettre à jour les labels et les boutons en fonction du retrait de la carte
-    #             self.show_button.configure(text='Insert', state='disabled')
-    #             logger.debug("Labels and button updated for card removal")
-    #         except Exception as e:
-    #             logger.error(f"An error occurred while updating labels and button for card removal: {e}", exc_info=True)
-    #     except Exception as e:
-    #         logger.error(f"An unexpected error occurred in card_removed: {e}", exc_info=True)
-
     def click_reset_button(self):
         try:
             logger.info("Attempting to reset the card.")
