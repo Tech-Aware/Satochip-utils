@@ -2,8 +2,7 @@ import logging
 from os import urandom, path
 import sys
 from configparser import ConfigParser
-from pysatochip.pysatochip.CardConnector import (CardConnector, UninitializedSeedError)
-from pysatochip.pysatochip.version import *
+from pysatochip.CardConnector import (CardConnector, UninitializedSeedError)
 
 seed = None
 if (len(sys.argv) >= 2) and (sys.argv[1] in ['-v', '--verbose']):
@@ -115,7 +114,6 @@ class Controller:
                 self.nfc = self.cc.nfc_policy
                 self.applet_version = f"{card_status['protocol_major_version']}.{card_status['protocol_minor_version']}-{card_status['applet_major_version']}.{card_status['applet_minor_version']}"
 
-
                 # self.card_label = self.cc.card_label
 
                 return (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
@@ -132,22 +130,23 @@ class Controller:
                 self.card_type = None
                 self.card_label = None
 
-    def card_transmit_reset(self):
-        try:
-            logger.debug("In card_transmit_reset")
-            while self.cc.card_present:
-                try:
-                    # transmit apdu
-                    apdu = [0xB0, 0xFF, 0x00, 0x00, 0x00]
-                    response, sw1, sw2 = self.cc.cardservice.connection.transmit(apdu)
-                    logger.info("APDU transmitted successfully")
-                    return response, sw1, sw2
-                except Exception as e:
-                    logger.error(f"ERROR: An error occurred during APDU transmission: {e}")
-                    raise
-        except Exception as e:
-            logger.error(f"ERROR: An error occurred in card_transmit_reset: {e}")
-            raise
+    # def card_transmit_reset(self):
+    #     #todo: in pysatochip
+    #     try:
+    #         logger.debug("In card_transmit_reset")
+    #         while self.cc.card_present:
+    #             try:
+    #                 # transmit apdu
+    #                 apdu = [0xB0, 0xFF, 0x00, 0x00, 0x00]
+    #                 response, sw1, sw2 = self.cc.cardservice.connection.transmit(apdu)
+    #                 logger.info("APDU transmitted successfully")
+    #                 return response, sw1, sw2
+    #             except Exception as e:
+    #                 logger.error(f"ERROR: An error occurred during APDU transmission: {e}")
+    #                 raise
+    #     except Exception as e:
+    #         logger.error(f"ERROR: An error occurred in card_transmit_reset: {e}")
+    #         raise
 
     def request(self, request_type, *args):
         logger.info(str(request_type))
@@ -156,8 +155,8 @@ class Controller:
         reply = method_to_call(*args)
         return reply
 
-    def disconnect_the_card(self):
-        self.cc.card_disconnect()
+    # def disconnect_the_card(self):
+    #     self.cc.card_disconnect()
 
     def handle_user_action(self,
                            frame_concerned,
@@ -184,12 +183,12 @@ class Controller:
 
             if frame_concerned == "welcome" and button_clicked == "Let's Go!":
                 logger.info("Welcome frame: Starting setup.")
-                self.request("start_setup")
+                self.view.start_setup()
 
             if frame_concerned == "setup_my_card_pin":
                 if button_clicked == "Cancel":
                     logger.info("Setup my card PIN: Cancelled by user.")
-                    self.request("start_setup")
+                    self.view.start_setup()
 
                 if button_clicked == "Finish":
                     pin = first_entry_value
@@ -202,25 +201,25 @@ class Controller:
                                 self.card_setup_native_pin(pin)
                             else:
                                 logger.warning("Setup my card PIN: PINs do not match.")
-                                self.request('show', 'ERROR',
-                                             "Pin and pin confirm do not match!", 'Ok',
-                                             None, "./pictures_db/icon_change_pin_popup.jpg")
+                                self.view.show('ERROR', "Pin and pin confirm do not match!", 'Ok',
+                                               None, "./pictures_db/icon_change_pin_popup.jpg")
                         else:
                             logger.warning("Setup my card PIN: PIN is too short.")
-                            self.request("show", "ERROR",
-                                         "Pin must contain at least 4 characters", 'Ok',
-                                         None, "./pictures_db/icon_change_pin_popup.jpg")
+                            self.view.show("ERROR",
+                                           "Pin must contain at least 4 characters",
+                                           'Ok', None,
+                                           "./pictures_db/icon_change_pin_popup.jpg")
                     else:
-                        self.request("show", "ERROR",
-                                     "You have to set up a PIN to continue.", 'Ok',
-                                     None, "./pictures_db/icon_change_pin_popup.jpg")
+                        self.view.show("ERROR", "You have to set up a PIN to continue.", 'Ok',
+                                       None, "./pictures_db/icon_change_pin_popup.jpg")
+            #
 
             if frame_concerned == "setup_my_card_seed":
                 from mnemonic import Mnemonic
 
                 if button_clicked == "Cancel":
                     logger.info("Setup my card seed: Cancelled by user.")
-                    self.request("start_setup")
+                    self.view.start_setup()
 
                 if button_clicked == "generate_seed_button":
                     try:
@@ -238,24 +237,27 @@ class Controller:
                                 passphrase = None
                                 logger.info(f"Generated seed: {seed}")
                             if passphrase is not None:
-                                self.request("update_textbox", seed)
+                                self.view.update_textbox(seed)
                                 seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
-                                logger.info(f"Generate see: {seed}. Corresponding to {mnemonic} as mnemonic and passphrase {passphrase})")
+                                logger.info(
+                                    f"Generate see: {seed}. Corresponding to {mnemonic} as mnemonic and passphrase {passphrase})")
                             else:
-                                self.request("update_textbox", seed)
+                                self.view.update_textbox(seed)
                                 seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
-                            self.request("show",
-                                         "WARNING",
-                                         "Your mnemonic is very important!\nBe sure to copy it in a safe place.", 'Ok',
-                                         None, "./pictures_db/icon_seed_popup.jpg")
+                            self.view.show("WARNING",
+                                           "Your mnemonic is very important!\nBe sure to copy it in a safe place.",
+                                           'Ok', None,
+                                           "./pictures_db/icon_seed_popup.jpg")
+
                         else:
                             logger.warning("Setup my card seed: Invalid strength value.")
-                            self.request("show", "ERROR", "Invalid strength value.", 'Ok', None,
-                                         "./pictures_db/icon_seed_popup.jpg")
+                            self.view.show("ERROR", "Invalid strength value.", 'Ok', None,
+                                           "./pictures_db/icon_seed_popup.jpg")
+
                     except Exception as e:
                         logger.error(f"Error generating seed: {e}")
-                        self.request("show", "ERROR", "Failed to generate seed.", 'ok', None,
-                                     "./pictures_db/icon_seed_popup.jpg")
+                        self.view.show("ERROR", "Failed to generate seed.", 'ok', None,
+                                       "./pictures_db/icon_seed_popup.jpg")
 
                 if button_clicked == "import_seed_button":
                     try:
@@ -269,7 +271,7 @@ class Controller:
                                 if passphrase is not None:
                                     if passphrase in ["", " ", "Type your passphrase here"]:
                                         logger.error("Passphrase is blank or empy")
-                                        self.request('show', 'WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
+                                        self.view.show('WARNING', 'Wrong passphrase: incorrect or blank', 'Ok')
                                     else:
                                         seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
                                         logger.info(f"seed:{seed}")
@@ -284,13 +286,16 @@ class Controller:
                                     self.card_setup_native_seed(seed)
                             else:
                                 logger.warning("Imported seed is invalid.")
-                                self.request('show', 'WARNING',
-                                             "Warning!\nInvalid BIP39 seedphrase, please retry.", 'Ok',
-                                             None, "./pictures_db/icon_seed_popup.jpg")
+                                self.view.show('WARNING',
+                                               "Warning!\nInvalid BIP39 seedphrase, please retry.",
+                                               'Ok',
+                                               None,
+                                               "./pictures_db/icon_seed_popup.jpg")
+
                     except Exception as e:
                         logger.error(f"Error importing seed: {e}")
-                        self.request("show", "ERROR", "Failed to import seed.", "Ok", None,
-                                     "./pictures_db/icon_seed_popup.jpg")
+                        self.view.show("ERROR", "Failed to import seed.", "Ok", None,
+                                       "./pictures_db/icon_seed_popup.jpg")
 
                 if button_clicked == "Finish":
                     try:
@@ -305,18 +310,19 @@ class Controller:
                                 self.card_setup_native_seed(seed)
                             else:
                                 logger.warning("Imported seed is invalid.")
-                                self.request('show', 'ERROR', "Invalid BIP39 seed! Please type again!", 'Ok',
-                                             None, "./pictures_db/icon_seed_popup.jpg")
+                                self.view.show('ERROR', "Invalid BIP39 seed! Please type again!",
+                                               'Ok', None, "./pictures_db/icon_seed_popup.jpg")
+
                     except Exception as e:
                         logger.error(f"Error importing seed: {e}")
-                        self.request("show", "ERROR", "Failed to import seed.", "Ok", None,
-                                     "./pictures_db/icon_seed_popup.jpg")
+                        self.view.show("ERROR", "Failed to import seed.", "Ok", None,
+                                       "./pictures_db/icon_seed_popup.jpg")
 
             if frame_concerned == "edit_label":
                 try:
                     if self.cc.card_present:
                         if button_clicked == "Cancel":
-                            self.request('start_setup')
+                            self.view.start_setup()
 
                         if button_clicked == "Finish":
                             if first_entry_value:
@@ -327,25 +333,26 @@ class Controller:
                                     response, sw1, sw2, label = self.cc.card_get_label()
                                     logger.info(f"New label set successfully: {label}")
                                     self.card_label = label
-                                    self.request("show", "SUCCESS",
-                                                 f"New label set successfully",
-                                                 "Ok",
-                                                 self.request("start_setup"), "./pictures_db/icon_edit_label_popup.jpg")
+                                    self.view.show("SUCCESS",
+                                                   f"New label set successfully",
+                                                   "Ok", self.view.start_setup(),
+                                                   "./pictures_db/icon_edit_label_popup.jpg")
                                 else:
                                     logger.warning("Failed to set new label.")
-                                    self.request("show", "ERROR", "Failed to set label: too long.", "oK", None,
-                                                 "./pictures_db/icon_edit_label_popup.jpg")
+                                    self.view.show("ERROR", "Failed to set label: too long.", "oK",
+                                                   None, "./pictures_db/icon_edit_label_popup.jpg")
                             else:
                                 logger.warning("Blank label cannot be set.")
-                                self.request("show",
-                                             "WARNING",
-                                             "You can't set a blank label!",
-                                             "Ok!",
-                                             self.request("edit_label"), "./pictures_db/icon_edit_label_popup.jpg")
+                                #TODO: actually you can set blank label!!
+                                self.view.show("WARNING",
+                                               "You can't set a blank label!",
+                                               "Ok!",
+                                               self.view.edit_label(),
+                                               "./pictures_db/icon_edit_label_popup.jpg")
                 except Exception as e:
                     logger.error(f"Error editing label: {e}")
-                    self.request("show", "ERROR", "Failed to edit label.", "Ok", None,
-                                 "./pictures_db/icon_edit_label_popup.jpg")
+                    self.view.show("ERROR", "Failed to edit label.", "Ok", None,
+                                   "./pictures_db/icon_edit_label_popup.jpg")
 
             if frame_concerned == "change_pin":
                 logger.info("In change_pin")
@@ -358,15 +365,16 @@ class Controller:
 
                             if len(new_pin) <= 3:
                                 logger.warning("New PIN is too short.")
-                                self.request("show", "ERROR",
-                                             "Pin must contain at least 4 characters", 'Ok',
-                                             None, "./pictures_db/icon_change_pin_popup.jpg")
+                                self.view.show("ERROR",
+                                               "Pin must contain at least 4 characters", 'Ok',
+                                               None, "./pictures_db/icon_change_pin_popup.jpg")
 
                             if new_pin != new_pin_confirm:
                                 logger.warning("New PINs do not match.")
-                                self.request("show", "WARNING",
-                                             "The PIN values do not match! Please type PIN again!", "Ok",
-                                             None, "./pictures_db/icon_change_pin_popup.jpg")
+                                self.view.show("WARNING",
+                                               "The PIN values do not match! Please type PIN again!",
+                                               "Ok", None,
+                                               "./pictures_db/icon_change_pin_popup.jpg")
                             else:
                                 current_pin = list(current_pin.encode('utf8'))
                                 new_pin = list(new_pin.encode('utf8'))
@@ -374,26 +382,25 @@ class Controller:
                                 if sw1 == 0x90 and sw2 == 0x00:
                                     logger.info("PIN changed successfully.")
                                     msg = "PIN changed successfully!"
-                                    self.request("show", "SUCCESS", msg, 'Ok',
-                                                 None, "./pictures_db/icon_change_pin_popup.jpg")
-                                    self.request('start_setup')
+                                    self.view.show("SUCCESS", msg, 'Ok',
+                                                   None, "./pictures_db/icon_change_pin_popup.jpg")
+                                    self.view.start_setup()
                                 else:
                                     logger.error(f"Failed to change PIN with error code: {hex(sw1)}{hex(sw2)}")
                                     msg = f"Failed to change PIN with error code: {hex(sw1)}{hex(sw2)}"
-                                    self.request("show", "ERROR", f"{msg}\n Probably too long", 'Ok',
-                                                 None, "./pictures_db/icon_change_pin_popup.jpg")
+                                    self.view.show("ERROR", f"{msg}\n Probably too long", 'Ok',
+                                                   None, "./pictures_db/icon_change_pin_popup.jpg")
                 except Exception as e:
                     logger.error(f"Error changing PIN: {e}")
-                    self.request("show", "ERROR", "Failed to change PIN.", "Ok",
-                                 None, "./pictures_db/icon_change_pin_popup.jpg")
+                    self.view.show("ERROR", "Failed to change PIN.", "Ok",
+                                   None, "./pictures_db/icon_change_pin_popup.jpg")
         except Exception as e:
             logger.error(f"Error in handle_user_action: {e}")
-            self.request("show", "ERROR", "An unexpected error occurred.", "Ok",
-                         None, "./pictures_db/icon_change_pin_popup.jpg")
+            self.view.show("ERROR", "An unexpected error occurred.", "Ok",
+                           None, "./pictures_db/icon_change_pin_popup.jpg")
 
-    # interaction with card
-    # for label
     def get_card_label_infos(self):
+        """Get label info"""
         if self.cc.card_present:
             response, sw1, sw2, label = self.cc.card_get_label()
             if label is None:
@@ -413,33 +420,34 @@ class Controller:
 
             def switch_unlock_to_false_and_quit():
                 self.view.spot_if_unlock = False
-                self.request('start_setup')
-                self.request('update_status')
+                self.view.start_setup()
+                self.view.update_status()
 
             while True:
                 try:
                     logger.debug("Requesting passphrase")
-                    pin = self.request('get_passphrase', msg)
+                    pin = self.view.get_passphrase(msg)
                     logger.debug(f"Passphrase received: pin={'***' if pin else None}")
 
                     if pin is None:
                         logger.info("Passphrase request cancelled or window closed")
-                        self.request("show", "INFO", 'Device cannot be unlocked without PIN code!', 'Ok',
-                                     lambda: switch_unlock_to_false_and_quit(), "./pictures_db/icon_change_pin_popup.jpg")
+                        self.view.show("INFO",
+                                       'Device cannot be unlocked without PIN code!',
+                                       'Ok',
+                                       lambda: switch_unlock_to_false_and_quit(),
+                                       "./pictures_db/icon_change_pin_popup.jpg")
                         break
 
                     elif len(pin) < 4:
                         logger.warning("PIN length is less than 4 characters")
                         msg = "PIN must have at least 4 characters."
-                        self.request("show", "INFO", msg, 'Ok',
-                                     None, "./pictures_db/icon_change_pin_popup.jpg")
-
+                        self.view.show("INFO", msg, 'Ok', None,
+                                       "./pictures_db/icon_change_pin_popup.jpg")
                     elif len(pin) > 64:
                         logger.warning("PIN length is more than 64 characters")
                         msg = "PIN must have less than 64 characters."
-                        self.request("show", "INFO", msg, 'Ok',
-                                     None, "./pictures_db/icon_change_pin_popup.jpg")
-
+                        self.view.show("INFO", msg, 'Ok', None,
+                                       "./pictures_db/icon_change_pin_popup.jpg")
                     else:
                         logger.info("PIN length is valid")
                         pin = pin.encode('utf8')
@@ -448,8 +456,8 @@ class Controller:
                             break
                         except Exception as e:
                             logger.info("exception from pin dialog")
-                            self.request('show', 'ERROR', str(e), 'Ok', None,
-                                         "./pictures_db/icon_change_pin_popup.jpg")
+                            self.view.show('ERROR', str(e), 'Ok', None,
+                                           "./pictures_db/icon_change_pin_popup.jpg")
 
                 except Exception as e:
                     logger.error(f"An error occurred while requesting passphrase: {e}", exc_info=True)
@@ -488,27 +496,15 @@ class Controller:
 
             if sw1 != 0x90 or sw2 != 0x00:
                 logger.warning(f"Unable to set up applet! sw12={hex(sw1)} {hex(sw2)}")
-                self.request('show', 'ERROR', f"Unable to set up applet! sw12={hex(sw1)} {hex(sw2)}")
+                self.view.show('ERROR', f"Unable to set up applet! sw12={hex(sw1)} {hex(sw2)}")
                 return False
             else:
                 logger.info("Applet setup successfully")
                 self.setup_done = True
-                self.request('update_status')
-                self.request('start_setup')
+                self.view.update_status()
+                self.view.start_setup()
         except Exception as e:
             logger.error(f"An error occurred in card_setup_native_pin: {e}", exc_info=True)
-
-            # I put this option between docstring to use it later in another part of the code
-            """# set card label
-            try:
-                (response, sw1, sw2) = self.cc.card_set_label(label)
-                self.request('show',
-                             'SUCCESS',
-                             f"Your Satochip has now a label and a PIN code.",
-                             "Let's seed it ..." if self.cc.card_type == "Satochip" else "End",
-                             self.request("setup_my_card_seed") if self.cc.card_type == "Satochip" else self.request("start_setup"))
-            except Exception as ex:
-                logger.warning(f"Error while setting card label: {str(ex)}")"""
 
     # only for satochip
     def card_setup_native_seed(self, seed):
@@ -524,34 +520,29 @@ class Controller:
             logger.info(f"authentikey: {authentikey}")
             if authentikey:
                 self.is_seeded = True
-                self.request('show',
-                             'SUCCESS',
-                             'Your card is now seeded!',
-                             'Ok',
-                             lambda: None,
-                             "./pictures_db/icon_seed_popup.jpg")
-                self.request('update_status')
-                self.request('start_setup')
+                self.view.show('SUCCESS',
+                               'Your card is now seeded!',
+                               'Ok',
+                               lambda: None,
+                               "./pictures_db/icon_seed_popup.jpg")
+                self.view.update_status()
+                self.view.start_setup()
 
                 hex_authentikey = authentikey.get_public_key_hex()
                 logger.info(f"Authentikey={hex_authentikey}")
             else:
-                self.request('show', 'ERROR', 'Error when importing seed to Satochip!', 'Ok', None,
-                             "./pictures_db/icon_seed_popup.jpg")
+                self.view.show('ERROR', 'Error when importing seed to Satochip!', 'Ok', None,
+                               "./pictures_db/icon_seed_popup.jpg")
 
-    def check_card_authenticity(self):
-        logger.info("check_card_authenticity")
-        if self.card_present:
-            is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.cc.card_verify_authenticity()
-            logger.info(f"is_authentic: {is_authentic}")
-            logger.info(f"txt_ca: {txt_ca}")
-            logger.info(f"txt_subca: {txt_subca}")
-            logger.info(f"txt_device: {txt_device}")
-            logger.info(f"txt_error: {txt_error}")
-            return is_authentic, txt_ca, txt_subca, txt_device, txt_error
-        else:
-            pass
-
-
-
-
+    # def check_card_authenticity(self):
+    #     logger.info("check_card_authenticity")
+    #     if self.card_present:
+    #         is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.cc.card_verify_authenticity()
+    #         logger.info(f"is_authentic: {is_authentic}")
+    #         logger.info(f"txt_ca: {txt_ca}")
+    #         logger.info(f"txt_subca: {txt_subca}")
+    #         logger.info(f"txt_device: {txt_device}")
+    #         logger.info(f"txt_error: {txt_error}")
+    #         return is_authentic, txt_ca, txt_subca, txt_device, txt_error
+    #     else:
+    #         pass
