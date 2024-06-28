@@ -221,7 +221,7 @@ class Controller:
                     logger.info("Setup my card seed: Cancelled by user.")
                     self.view.start_setup()
 
-                if button_clicked == "generate_seed_button":
+                elif button_clicked == "generate_seed_button":
                     try:
                         logger.info(f"IN setup my card seed, sev: {second_entry_value}")
                         strength = 128 if second_entry_value == 12 else 256 if second_entry_value == 24 else None
@@ -244,10 +244,10 @@ class Controller:
                             else:
                                 self.view.update_textbox(seed)
                                 seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
-                            self.view.show("WARNING",
-                                           "Your mnemonic is very important!\nBe sure to copy it in a safe place.",
-                                           'Ok', None,
-                                           "./pictures_db/icon_seed_popup.jpg")
+                            # self.view.show("WARNING",
+                            #                "Your mnemonic is very important!\nBe sure to copy it in a safe place.",
+                            #                'Ok', None,
+                            #                "./pictures_db/icon_seed_popup.jpg")
 
                         else:
                             logger.warning("Setup my card seed: Invalid strength value.")
@@ -259,7 +259,7 @@ class Controller:
                         self.view.show("ERROR", "Failed to generate seed.", 'ok', None,
                                        "./pictures_db/icon_seed_popup.jpg")
 
-                if button_clicked == "import_seed_button":
+                elif button_clicked == "import_seed_button":
                     try:
                         MNEMONIC = Mnemonic(language="english")
                         if first_entry_value is not None:
@@ -297,7 +297,7 @@ class Controller:
                         self.view.show("ERROR", "Failed to import seed.", "Ok", None,
                                        "./pictures_db/icon_seed_popup.jpg")
 
-                if button_clicked == "Finish":
+                elif button_clicked == "Finish":
                     try:
                         MNEMONIC = Mnemonic(language="english")
                         if first_entry_value is not None:
