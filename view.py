@@ -1801,8 +1801,8 @@ class View(customtkinter.CTk):
             try:
                 logger.debug("Creating cancel and finish buttons")
                 self.cancel_button = View.create_button(self, cancel_button,
-                                                        lambda: self.controller.handle_user_action(frame_name,
-                                                                                                   cancel_button))
+                                                        lambda: self.start_setup())
+
                 self.cancel_button.place(relx=0.7, rely=0.9, anchor="w")
 
                 finish_button_conditional_label = "Change it"
@@ -1810,11 +1810,10 @@ class View(customtkinter.CTk):
                 self.finish_button = View.create_button(self,
                                                         finish_button_conditional_label,
                                                         lambda:
-                                                        self.controller.handle_user_action(frame_name, finish_button,
-                                                                                           edit_card_entry.get()))
+                                                        self.controller.edit_label(edit_card_entry.get()))
+
                 self.finish_button.place(relx=0.85, rely=0.9, anchor="w")
-                self.bind('<Return>', lambda event: self.controller.handle_user_action(frame_name, finish_button,
-                                                                                       edit_card_entry.get()))
+                self.bind('<Return>', lambda event: self.controller.edit_label(edit_card_entry.get()))
                 logger.debug("Cancel and finish buttons created and placed")
             except Exception as e:
                 logger.error(f"An error occurred while creating cancel and finish buttons: {e}", exc_info=True)

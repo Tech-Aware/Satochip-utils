@@ -204,7 +204,27 @@ class Controller:
             self.view.show("ERROR", "Failed to import seed.", "Ok", None,
                            "./pictures_db/icon_seed_popup.jpg")
 
+    def edit_label(self, label):
+        try:
+            logger.info(f"New label to set: {label}")
+            (response, sw1, sw2) = self.cc.card_set_label(label)
+            if sw1 == 0x90 and sw2 == 0x00:
+                response, sw1, sw2, label = self.cc.card_get_label()
+                logger.info(f"New label set successfully: {label}")
+                self.card_label = label
+                self.view.show("SUCCESS",
+                               f"New label set successfully",
+                               "Ok", self.view.start_setup(),
+                               "./pictures_db/icon_edit_label_popup.jpg")
+            else:
+                logger.warning("Failed to set new label.")
+                self.view.show("ERROR", f"Failed to set label (code {hex(sw1*256+sw2)})", "oK",
+                               None, "./pictures_db/icon_edit_label_popup.jpg")
 
+        except Exception as e:
+            logger.error(f"Failed to edit label: {e}")
+            self.view.show("ERROR", f"Failed to edit label: {e}", "Ok", None,
+                           "./pictures_db/icon_edit_label_popup.jpg")
     def handle_user_action(self,
                            frame_concerned,
                            button_clicked=None,
@@ -261,7 +281,7 @@ class Controller:
                                        None, "./pictures_db/icon_change_pin_popup.jpg")
             #
 
-            if frame_concerned == "setup_my_card_seed":
+            #if frame_concerned == "setup_my_card_seed":
                 #from mnemonic import Mnemonic
 
                 # if button_clicked == "Cancel":
@@ -365,41 +385,41 @@ class Controller:
                 #         self.view.show("ERROR", "Failed to import seed.", "Ok", None,
                 #                        "./pictures_db/icon_seed_popup.jpg")
 
-            if frame_concerned == "edit_label":
-                try:
-                    if self.cc.card_present:
-                        if button_clicked == "Cancel":
-                            self.view.start_setup()
-
-                        if button_clicked == "Finish":
-                            if first_entry_value:
-                                label = first_entry_value
-                                logger.info(f"New label to set: {label}")
-                                (response, sw1, sw2) = self.cc.card_set_label(label)
-                                if sw1 == 0x90 and sw2 == 0x00:
-                                    response, sw1, sw2, label = self.cc.card_get_label()
-                                    logger.info(f"New label set successfully: {label}")
-                                    self.card_label = label
-                                    self.view.show("SUCCESS",
-                                                   f"New label set successfully",
-                                                   "Ok", self.view.start_setup(),
-                                                   "./pictures_db/icon_edit_label_popup.jpg")
-                                else:
-                                    logger.warning("Failed to set new label.")
-                                    self.view.show("ERROR", "Failed to set label: too long.", "oK",
-                                                   None, "./pictures_db/icon_edit_label_popup.jpg")
-                            else:
-                                logger.warning("Blank label cannot be set.")
-                                #TODO: actually you can set blank label!!
-                                self.view.show("WARNING",
-                                               "You can't set a blank label!",
-                                               "Ok!",
-                                               self.view.edit_label(),
-                                               "./pictures_db/icon_edit_label_popup.jpg")
-                except Exception as e:
-                    logger.error(f"Error editing label: {e}")
-                    self.view.show("ERROR", "Failed to edit label.", "Ok", None,
-                                   "./pictures_db/icon_edit_label_popup.jpg")
+            # if frame_concerned == "edit_label":
+            #     try:
+            #         if self.cc.card_present:
+            #             if button_clicked == "Cancel":
+            #                 self.view.start_setup()
+            #
+            #             if button_clicked == "Finish":
+            #                 if first_entry_value:
+            #                     label = first_entry_value
+            #                     logger.info(f"New label to set: {label}")
+            #                     (response, sw1, sw2) = self.cc.card_set_label(label)
+            #                     if sw1 == 0x90 and sw2 == 0x00:
+            #                         response, sw1, sw2, label = self.cc.card_get_label()
+            #                         logger.info(f"New label set successfully: {label}")
+            #                         self.card_label = label
+            #                         self.view.show("SUCCESS",
+            #                                        f"New label set successfully",
+            #                                        "Ok", self.view.start_setup(),
+            #                                        "./pictures_db/icon_edit_label_popup.jpg")
+            #                     else:
+            #                         logger.warning("Failed to set new label.")
+            #                         self.view.show("ERROR", "Failed to set label: too long.", "oK",
+            #                                        None, "./pictures_db/icon_edit_label_popup.jpg")
+            #                 else:
+            #                     logger.warning("Blank label cannot be set.")
+            #                     #TODO: actually you can set blank label!!
+            #                     self.view.show("WARNING",
+            #                                    "You can't set a blank label!",
+            #                                    "Ok!",
+            #                                    self.view.edit_label(),
+            #                                    "./pictures_db/icon_edit_label_popup.jpg")
+            #     except Exception as e:
+            #         logger.error(f"Error editing label: {e}")
+            #         self.view.show("ERROR", "Failed to edit label.", "Ok", None,
+            #                        "./pictures_db/icon_edit_label_popup.jpg")
 
             if frame_concerned == "change_pin":
                 logger.info("In change_pin")
