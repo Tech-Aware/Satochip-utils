@@ -1431,7 +1431,6 @@ class View(customtkinter.CTk):
             radio_value = customtkinter.StringVar(value="")
             value_checkbox_passphrase = customtkinter.StringVar(value="off")
             radio_value_mnemonic = customtkinter.StringVar(value="")
-            mnemonic_length = None  # (12 or 24 words)
             generate_with_passphrase = False  # use a passphrase?
             logger.debug(f"Settings radio_value: {radio_value}, generate_with_passphrase: {generate_with_passphrase}")
 
@@ -1448,16 +1447,11 @@ class View(customtkinter.CTk):
                     mnemonic_length = 24
                     logger.info(f"in update radio selection mnemonic: generate 24: {mnemonic_length}")
 
-                self.controller.handle_user_action(
-                    frame_concerned="setup_my_card_seed",
-                    button_clicked="generate_seed_button",
-                    first_entry_value="passphrase" if generate_with_passphrase else None,
-                    second_entry_value=mnemonic_length,
-                    third_entry_value=passphrase_entry.get()
-                )
+                mnemonic = self.controller.generate_random_seed(mnemonic_length)
+                self.update_textbox(mnemonic)
 
             def update_radio_selection():
-                nonlocal mnemonic_length, generate_with_passphrase
+                nonlocal generate_with_passphrase
                 self.import_seed = False
 
                 if radio_value.get() == "import":
@@ -1514,6 +1508,7 @@ class View(customtkinter.CTk):
                         passphrase_entry.place(relx=0.35, rely=0.65, anchor="w")
                         passphrase_entry.configure(placeholder_text="Type your passphrase here")
                     else:
+                        generate_with_passphrase = False
                         passphrase_entry.place_forget()
 
                 elif radio_value.get() == "generate":
@@ -1524,6 +1519,7 @@ class View(customtkinter.CTk):
                         passphrase_entry.place(relx=0.37, rely=0.76, anchor="w")
                         passphrase_entry.configure(placeholder_text="Type your passphrase here")
                     else:
+                        generate_with_passphrase = False
                         passphrase_entry.place_forget()
 
             try:

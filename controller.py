@@ -2,6 +2,7 @@ import logging
 from os import urandom, path
 import sys
 from configparser import ConfigParser
+from mnemonic import Mnemonic
 from pysatochip.CardConnector import (CardConnector, UninitializedSeedError)
 
 seed = None
@@ -158,6 +159,23 @@ class Controller:
     # def disconnect_the_card(self):
     #     self.cc.card_disconnect()
 
+    def generate_random_seed(self, mnemonic_length):
+        try:
+            logger.info(f"In generate_random_seed(), mnemonic_length: {mnemonic_length}")
+            strength = 128 if mnemonic_length == 12 else 256 if mnemonic_length == 24 else None
+
+            if strength:
+                MNEMONIC = Mnemonic(language="english")
+                mnemonic = MNEMONIC.generate(strength=strength)
+                return mnemonic
+            else:
+                logger.warning("generate_random_seed: invalid mnemonic length {mnemonic_length}")
+                return f"Error: invalid mnemonic length {mnemonic_length}"
+
+        except Exception as e:
+            logger.error(f"generate_random_seed: Error generating seed: {e}")
+            return f"Exception: {e}"
+
     def handle_user_action(self,
                            frame_concerned,
                            button_clicked=None,
@@ -215,49 +233,49 @@ class Controller:
             #
 
             if frame_concerned == "setup_my_card_seed":
-                from mnemonic import Mnemonic
+                #from mnemonic import Mnemonic
 
                 if button_clicked == "Cancel":
                     logger.info("Setup my card seed: Cancelled by user.")
                     self.view.start_setup()
 
-                elif button_clicked == "generate_seed_button":
-                    try:
-                        logger.info(f"IN setup my card seed, sev: {second_entry_value}")
-                        strength = 128 if second_entry_value == 12 else 256 if second_entry_value == 24 else None
-
-                        if strength:
-                            MNEMONIC = Mnemonic(language="english")
-                            mnemonic = MNEMONIC.generate(strength=strength)
-                            seed = mnemonic
-                            if first_entry_value is not None:
-                                passphrase = third_entry_value
-                                logger.info(f"Generated seed: {seed}, passphrase: {passphrase}")
-                            else:
-                                passphrase = None
-                                logger.info(f"Generated seed: {seed}")
-                            if passphrase is not None:
-                                self.view.update_textbox(seed)
-                                seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
-                                logger.info(
-                                    f"Generate see: {seed}. Corresponding to {mnemonic} as mnemonic and passphrase {passphrase})")
-                            else:
-                                self.view.update_textbox(seed)
-                                seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
-                            # self.view.show("WARNING",
-                            #                "Your mnemonic is very important!\nBe sure to copy it in a safe place.",
-                            #                'Ok', None,
-                            #                "./pictures_db/icon_seed_popup.jpg")
-
-                        else:
-                            logger.warning("Setup my card seed: Invalid strength value.")
-                            self.view.show("ERROR", "Invalid strength value.", 'Ok', None,
-                                           "./pictures_db/icon_seed_popup.jpg")
-
-                    except Exception as e:
-                        logger.error(f"Error generating seed: {e}")
-                        self.view.show("ERROR", "Failed to generate seed.", 'ok', None,
-                                       "./pictures_db/icon_seed_popup.jpg")
+                # elif button_clicked == "generate_seed_button":
+                #     try:
+                #         logger.info(f"IN setup my card seed, sev: {second_entry_value}")
+                #         strength = 128 if second_entry_value == 12 else 256 if second_entry_value == 24 else None
+                #
+                #         if strength:
+                #             MNEMONIC = Mnemonic(language="english")
+                #             mnemonic = MNEMONIC.generate(strength=strength)
+                #             seed = mnemonic
+                #             if first_entry_value is not None:
+                #                 passphrase = third_entry_value
+                #                 logger.info(f"Generated seed: {seed}, passphrase: {passphrase}")
+                #             else:
+                #                 passphrase = None
+                #                 logger.info(f"Generated seed: {seed}")
+                #             if passphrase is not None:
+                #                 self.view.update_textbox(seed)
+                #                 seed = Mnemonic.to_seed(mnemonic, passphrase) if mnemonic else None
+                #                 logger.info(
+                #                     f"Generate see: {seed}. Corresponding to {mnemonic} as mnemonic and passphrase {passphrase})")
+                #             else:
+                #                 self.view.update_textbox(seed)
+                #                 seed = Mnemonic.to_seed(mnemonic) if mnemonic else None
+                #             # self.view.show("WARNING",
+                #             #                "Your mnemonic is very important!\nBe sure to copy it in a safe place.",
+                #             #                'Ok', None,
+                #             #                "./pictures_db/icon_seed_popup.jpg")
+                #
+                #         else:
+                #             logger.warning("Setup my card seed: Invalid strength value.")
+                #             self.view.show("ERROR", "Invalid strength value.", 'Ok', None,
+                #                            "./pictures_db/icon_seed_popup.jpg")
+                #
+                #     except Exception as e:
+                #         logger.error(f"Error generating seed: {e}")
+                #         self.view.show("ERROR", "Failed to generate seed.", 'ok', None,
+                #                        "./pictures_db/icon_seed_popup.jpg")
 
                 elif button_clicked == "import_seed_button":
                     try:
