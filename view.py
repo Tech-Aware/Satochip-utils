@@ -1361,22 +1361,10 @@ class View(customtkinter.CTk):
                                                         lambda: self.start_setup())
                 self.cancel_button.place(relx=0.7, rely=0.9, anchor="w")
 
-                # self.finish_button = View.create_button(self, "Save PIN",
-                #                                         lambda: self.controller.handle_user_action(frame_name,
-                #                                                                                    finish_button,
-                #                                                                                    edit_pin_entry.get(),
-                #                                                                                    edit_confirm_pin_entry.get()
-                #                                                                                    ))
                 self.finish_button = View.create_button(self, "Save PIN",
                                                         lambda: self.controller.setup_card_pin(edit_pin_entry.get(), edit_confirm_pin_entry.get()))
                 self.finish_button.place(relx=0.85, rely=0.9, anchor="w")
                 self.bind('<Return>', lambda event: self.controller.setup_card_pin(edit_pin_entry.get(), edit_confirm_pin_entry.get()))
-                # self.bind('<Return>', lambda event: self.controller.handle_user_action(frame_name,
-                #                                                                        finish_button,
-                #                                                                        edit_pin_entry.get(),
-                #                                                                        edit_confirm_pin_entry.get()
-                #                                                                        )
-                #           )
                 logger.debug("Cancel and finish buttons created and placed")
             except Exception as e:
                 logger.error(f"An error occurred while creating cancel and finish buttons: {e}", exc_info=True)
@@ -1707,33 +1695,17 @@ class View(customtkinter.CTk):
                 cancel_button = View.create_button(self, "Cancel", lambda: self.start_setup())
                 cancel_button.place(relx=0.7, rely=0.9, anchor="w")
 
-                # finish_button = View.create_button(self, "Change it",
-                #                                    lambda: self.controller.handle_user_action(frame_name, "Finish",
-                #                                                                               current_pin_entry.get(),
-                #                                                                               new_pin_entry.get(),
-                #                                                                               confirm_new_pin_entry.get()))
                 finish_button = View.create_button(self, "Change it",
                                                    lambda: self.controller.change_card_pin(current_pin_entry.get(),
                                                                                            new_pin_entry.get(),
                                                                                            confirm_new_pin_entry.get()))
 
                 finish_button.place(relx=0.85, rely=0.9, anchor="w")
-                # self.bind('<Return>', lambda event: self.controller.handle_user_action(
-                #     frame_name, "Finish",
-                #     current_pin_entry.get(),
-                #     new_pin_entry.get(),
-                #     confirm_new_pin_entry.get()))
                 self.bind('<Return>', lambda event: self.controller.change_card_pin(
                     current_pin_entry.get(),
                     new_pin_entry.get(),
                     confirm_new_pin_entry.get()))
                 logger.debug("Cancel and finish buttons created and placed")
-
-                # logger.info("IN View.change_pin() | Requesting card verification PIN")
-                # if self.controller.cc.is_pin_set():
-                #     self.controller.cc.card_verify_PIN_simple()
-                # else:
-                #     self.controller.PIN_dialog(f'Unlock your {self.card_type}')
 
             except Exception as e:
                 logger.error(f"An error occurred while creating cancel and finish buttons: {e}", exc_info=True)
