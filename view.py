@@ -40,16 +40,16 @@ class View(customtkinter.CTk):
             super().__init__()
 
             # status infos
-            self.card_type = None
-            self.setup_done = None
-            self.is_seeded = None
-            self.needs2FA = None
-            self.card_version = None
-            self.card_present = None
-            self.card_label = None
-            self.app_open = True
+            # self.card_type = None
+            # self.setup_done = None
+            # self.is_seeded = None
+            # self.needs2FA = None
+            # self.card_version = None
+            # self.card_present = None
+            # self.card_label = None
+            # self.app_open = True
             self.welcome_in_display = True
-            self.pin_left = None
+            # self.pin_left = None
 
             logger.setLevel(loglevel)
             logger.debug("Log level set to INFO")
@@ -135,8 +135,8 @@ class View(customtkinter.CTk):
         logger.info("IN View.on_close : Closing App")
         try:
             # Changement de l'état de l'application
-            self.app_open = False
-            logger.debug("app_open set to False")
+            # self.app_open = False
+            # logger.debug("app_open set to False")
 
             # Destruction de la fenêtre principale
             self.destroy()
@@ -724,7 +724,7 @@ class View(customtkinter.CTk):
         logger.info("IN View.main_menu")
         try:
             if state is None:
-                state = "normal" if self.card_present else "disabled"
+                state = "normal" if self.controller.cc.card_present else "disabled"
                 logger.info(f"Card {'detected' if state == 'normal' else 'undetected'}, setting state to {state}")
 
             menu_frame = customtkinter.CTkFrame(self.current_frame, width=250, height=600,
@@ -756,8 +756,8 @@ class View(customtkinter.CTk):
             canvas.image = logo_photo  # conserver une référence
             logger.debug("Logo section setup complete")
 
-            if self.card_present:
-                if not self.setup_done:
+            if self.controller.cc.card_present:
+                if not self.controller.cc.setup_done:
                     logger.info("Setup not done, enabling 'Setup My Card' button")
                     self.create_button_for_main_menu_item(
                         menu_frame,
@@ -767,8 +767,8 @@ class View(customtkinter.CTk):
                         command=lambda: self.setup_my_card_pin(), state='normal'
                     )
                 else:
-                    if not self.is_seeded and self.card_type != "Satodime":
-                        logger.info("Card seeded, enabling 'Setup Seed' button")
+                    if not self.controller.cc.is_seeded and self.controller.cc.card_type != "Satodime":
+                        logger.info("Card not seeded, enabling 'Setup Seed' button")
                         self.create_button_for_main_menu_item(
                             menu_frame,
                             "Setup Seed",
@@ -780,9 +780,9 @@ class View(customtkinter.CTk):
                         logger.info("Setup completed, disabling 'Setup Done' button")
                         self.create_button_for_main_menu_item(
                             menu_frame,
-                            "Setup Done" if self.card_present else 'Insert Card',
-                            "setup_done.jpg" if self.card_present else "insert_card.jpg",
-                            0.26, 0.575 if self.card_present else 0.595,
+                            "Setup Done" if self.controller.cc.card_present else 'Insert Card',
+                            "setup_done.jpg" if self.controller.cc.card_present else "insert_card.jpg",
+                            0.26, 0.575 if self.controller.cc.card_present else 0.595,
                             command=lambda: None, state='disabled'
                         )
             else:
@@ -795,7 +795,7 @@ class View(customtkinter.CTk):
                     command=lambda: None, state='normal'
                 )
 
-            if self.controller.cc.card_type != "Satodime" and self.setup_done:
+            if self.controller.cc.card_type != "Satodime" and self.controller.cc.setup_done:
                 logger.debug("Enabling 'Change Pin' button")
                 self.create_button_for_main_menu_item(
                     menu_frame,
@@ -806,7 +806,7 @@ class View(customtkinter.CTk):
                     state='normal'
                 )
             else:
-                logger.info(f"Card type is {self.card_type} | Disabling 'Change Pin' button")
+                logger.info(f"Card type is {self.controller.cc.card_type} | Disabling 'Change Pin' button")
                 self.create_button_for_main_menu_item(
                     menu_frame,
                     "Change Pin",
@@ -816,7 +816,7 @@ class View(customtkinter.CTk):
                     state='disabled'
                 )
 
-            if self.setup_done:
+            if self.controller.cc.setup_done:
                 self.create_button_for_main_menu_item(
                     menu_frame,
                     "Edit Label",
@@ -835,13 +835,13 @@ class View(customtkinter.CTk):
 
             def before_check_authenticity():
                 logger.info("IN View.main_menu() | Requesting card verification PIN")
-                if self.card_type != "Satodime":
+                if self.controller.cc.card_type != "Satodime":
                     if self.controller.cc.is_pin_set():
                         self.controller.cc.card_verify_PIN_simple()
                     else:
-                        self.controller.PIN_dialog(f'Unlock your {self.card_type}')
+                        self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
 
-            if self.setup_done:
+            if self.controller.cc.setup_done:
                 self.create_button_for_main_menu_item(
                     menu_frame,
                     "Check Authenticity",
@@ -857,8 +857,8 @@ class View(customtkinter.CTk):
                     0.47, 0.66,
                     command=lambda: self.check_authenticity(), state='disabled'
                 )
-            if self.card_present:
-                if self.card_type != "Satodime":
+            if self.controller.cc.card_present:
+                if self.controller.cc.card_type != "Satodime":
                     self.create_button_for_main_menu_item(
                         menu_frame,
                         "Reset my Card",
@@ -867,6 +867,7 @@ class View(customtkinter.CTk):
                         command=lambda: self.reset_my_card_window(), state='normal'
                     )
                 else:
+                    # TODO: remove button?
                     self.create_button_for_main_menu_item(
                         menu_frame,
                         "Reset my Card",
@@ -881,13 +882,6 @@ class View(customtkinter.CTk):
                     rel_y=0.73, rel_x=0.5052,
                     command=lambda: self.about(), state='normal'
                 )
-                '''self.create_button_for_main_menu_item(
-                    menu_frame,
-                    "Refresh menu",
-                    "refresh.jpg",
-                    rel_y=0.8, rel_x=0.593,
-                    command=refresh_main_menu, state='normal'
-                )'''
             else:
                 self.create_button_for_main_menu_item(
                     menu_frame,
@@ -903,13 +897,6 @@ class View(customtkinter.CTk):
                     rel_y=0.73, rel_x=0.5052,
                     command=lambda: self.about(), state='disabled'
                 )
-                '''self.create_button_for_main_menu_item(
-                    menu_frame,
-                    "Refresh menu",
-                    "refresh_locked.jpg",
-                    rel_y=0.8, rel_x=0.587,
-                    command=refresh_main_menu, state='disabled'
-                )'''
 
             self.create_button_for_main_menu_item(
                 menu_frame,
@@ -960,20 +947,21 @@ class View(customtkinter.CTk):
                 if isConnected is True:
                     try:
                         logger.info("Getting card status")
-                        (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                         self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
+                        self.controller.get_card_status()
+                        # (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
+                        #  self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
                         logger.info("Card status retrieved successfully")
 
-                        self.controller.card_event = True
-                        logger.debug("Controller card event set to True")
+                        #self.controller.card_event = True
+                        #logger.debug("Controller card event set to True")
 
-                        logger.info(f"Card presence: {self.card_present}")
-                        logger.info(f"Applet major version: {self.card_version}")
-                        logger.info(f"Needs 2FA: {self.needs2FA}")
-                        logger.info(f"Is seeded: {self.is_seeded}")
-                        logger.info(f"Setup done: {self.setup_done}")
-                        logger.info(f"Card type: {self.card_type}")
-                        logger.info(f"Card label: {self.card_label}")
+                        # logger.info(f"Card presence: {self.card_present}")
+                        # logger.info(f"Applet major version: {self.card_version}")
+                        # logger.info(f"Needs 2FA: {self.needs2FA}")
+                        # logger.info(f"Is seeded: {self.is_seeded}")
+                        # logger.info(f"Setup done: {self.setup_done}")
+                        # logger.info(f"Card type: {self.card_type}")
+                        # logger.info(f"Card label: {self.card_label}")
 
                         if not self.welcome_in_display:
                             self.start_setup()
@@ -983,53 +971,55 @@ class View(customtkinter.CTk):
                 elif isConnected is False:
                     try:
                         logger.info("Card disconnected, resetting status")
-                        self.card_present = None
-                        self.card_version = None
-                        self.needs2FA = None
-                        self.is_seeded = None
-                        self.setup_done = None
-                        self.card_type = None
-                        self.card_label = None
+                        # self.card_present = None
+                        # self.card_version = None
+                        # self.needs2FA = None
+                        # self.is_seeded = None
+                        # self.setup_done = None
+                        # self.card_type = None
+                        # self.card_label = None
 
-                        self.controller.card_event = False
-                        logger.debug("Controller card event set to False")
+                        #self.controller.card_event = False
+                        #logger.debug("Controller card event set to False")
 
-                        logger.info(f"Card presence: {self.card_present}")
-                        logger.info(f"Applet major version: {self.card_version}")
-                        logger.info(f"Needs 2FA: {self.needs2FA}")
-                        logger.info(f"Is seeded: {self.is_seeded}")
-                        logger.info(f"Setup done: {self.setup_done}")
-                        logger.info(f"Card type: {self.card_type}")
-                        logger.info(f"Card label: {self.card_label}")
-                        logger.info(f"Tries remaining:: {self.pin_left}")
-                        if self.app_open:
-                            self.start_setup()
+                        # logger.info(f"Card presence: {self.card_present}")
+                        # logger.info(f"Applet major version: {self.card_version}")
+                        # logger.info(f"Needs 2FA: {self.needs2FA}")
+                        # logger.info(f"Is seeded: {self.is_seeded}")
+                        # logger.info(f"Setup done: {self.setup_done}")
+                        # logger.info(f"Card type: {self.card_type}")
+                        # logger.info(f"Card label: {self.card_label}")
+                        # logger.info(f"Tries remaining:: {self.pin_left}")
+                        # if self.app_open:
+                        #     self.start_setup()
+                        self.start_setup()
 
                     except Exception as e:
                         logger.error(f"An error occurred while resetting card status: {e}", exc_info=True)
                     logger.info("Exiting update_status method successfully")
 
                 else: # isConnected is None
-                    try:
-                        logger.info("Getting card status")
-                        (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                         self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
-                        logger.info("Card status retrieved successfully")
+                    pass
+                    #try:
+                        #logger.info("Getting card status")
+                        #(self.card_present, self.card_version, self.needs2FA, self.is_seeded,
+                        # self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
+                        #logger.info("Card status retrieved successfully")
 
-                        self.controller.card_event = True
-                        logger.debug("Controller card event set to True")
+                        #self.controller.card_event = True
+                        #logger.debug("Controller card event set to True")
 
-                        logger.info(f"Card presence: {self.card_present}")
-                        logger.info(f"Applet major version: {self.card_version}")
-                        logger.info(f"Needs 2FA: {self.needs2FA}")
-                        logger.info(f"Is seeded: {self.is_seeded}")
-                        logger.info(f"Setup done: {self.setup_done}")
-                        logger.info(f"Card type: {self.card_type}")
-                        logger.info(f"Card label: {self.card_label}")
-                        logger.info(f"Tries remaining:: {self.pin_left}")
+                        # logger.info(f"Card presence: {self.card_present}")
+                        # logger.info(f"Applet major version: {self.card_version}")
+                        # logger.info(f"Needs 2FA: {self.needs2FA}")
+                        # logger.info(f"Is seeded: {self.is_seeded}")
+                        # logger.info(f"Setup done: {self.setup_done}")
+                        # logger.info(f"Card type: {self.card_type}")
+                        # logger.info(f"Card label: {self.card_label}")
+                        # logger.info(f"Tries remaining:: {self.pin_left}")
 
-                    except Exception as e:
-                        logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
+                    #except Exception as e:
+                    #    logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
         except Exception as e:
             logger.error(f"An unexpected error occurred in update_status method: {e}", exc_info=True)
 
@@ -1082,21 +1072,15 @@ class View(customtkinter.CTk):
                 logger.error(f"An error occurred while adding entry field to popup: {e}", exc_info=True)
 
             # Variables pour stocker les résultats
-            is_PIN = False
             pin = None
-
-            def close_get_passphrase():
-                self.start_setup()
 
             # Fonction pour soumettre la passphrase et fermer le popup
             def submit_passphrase():
                 try:
-                    nonlocal is_PIN, pin
-                    is_PIN = True
+                    nonlocal pin
                     pin = passphrase_entry.get()
                     popup.destroy()
                     logger.debug("Passphrase submitted and popup destroyed")
-
                 except Exception as e:
                     logger.error(f"An error occurred in submit_passphrase: {e}", exc_info=True)
 
@@ -1126,16 +1110,16 @@ class View(customtkinter.CTk):
                 logger.debug("Waiting for popup window to be destroyed")
 
                 # Retourner les résultats
-                logger.info(f"Returning results: is_PIN={is_PIN}, pin={'***' if pin else None}")
+                logger.info(f"Returning results: pin={'****' if pin else None}")
                 return pin
 
             except Exception as e:
                 logger.error(f"An error occurred while setting popup modal behavior: {e}", exc_info=True)
-                return False, None
+                return None
 
         except Exception as e:
             logger.error(f"An error occurred in get_passphrase: {e}", exc_info=True)
-            return False, None
+            return None
 
     #############
     """ VIEWS """
@@ -1202,7 +1186,7 @@ class View(customtkinter.CTk):
             self.after(2500, self.button.place(relx=0.85, rely=0.93, anchor="center"))
             logger.debug("Button created and placed")
 
-            if self.card_present is True:
+            if self.controller.cc.card_present:
                 logger.info("Card present")
             else:
                 logger.info("Card is not present, impossible to retrieve card status")
@@ -1235,17 +1219,16 @@ class View(customtkinter.CTk):
             logger.debug("Main frame created and placed")
 
             logger.info("Loading background photo")
-            if self.card_present:
-                logger.info("card_present")
-                logger.info(f"card type: {self.card_type}")
-                if self.card_type == "Satochip":
+            if self.controller.cc.card_present:
+                logger.info(f"card type: {self.controller.cc.card_type}")
+                if self.controller.cc.card_type == "Satochip":
                     self.background_photo = View.create_background_photo(self, "./pictures_db/card_satochip.png")
                     logger.info("bg_photo = satochip")
-                elif self.card_type == "SeedKeeper":
-                    logger.info(f"card type is {self.card_type}")
+                elif self.controller.cc.card_type == "SeedKeeper":
+                    logger.info(f"card type is {self.controller.cc.card_type}")
                     self.background_photo = View.create_background_photo(self, "./pictures_db/card_seedkeeper.png")
                     logger.info("bg_photo = seedkeeper")
-                elif self.card_type == "Satodime":
+                elif self.controller.cc.card_type == "Satodime":
                     self.background_photo = View.create_background_photo(self, "./pictures_db/card_satodime.png")
             else:
                 self.background_photo = View.create_background_photo(self, "./pictures_db/insert_card.png")
@@ -1258,11 +1241,11 @@ class View(customtkinter.CTk):
 
             logger.debug("Setting up labels")
             self.label = View.create_label(self,
-                                           "Please insert your card into your smart card" if not self.card_present else f"Your {self.card_type} is connected.")
+                                           "Please insert your card into your smart card" if not self.controller.cc.card_present else f"Your {self.controller.cc.card_type} is connected.")
             self.label.place(relx=0.33, rely=0.27, anchor="w")
 
             self.label = View.create_label(self,
-                                           "reader, and select the action you wish to perform." if not self.card_present else "Select on the menu the action you wish to perform.")
+                                           "reader, and select the action you wish to perform." if not self.controller.cc.card_present else "Select on the menu the action you wish to perform.")
             self.label.place(relx=0.33, rely=0.32, anchor="w")
             logger.debug("Labels created and placed")
 
@@ -1302,7 +1285,7 @@ class View(customtkinter.CTk):
 
             try:
                 logger.debug("Creating main menu")
-                if not self.controller.setup_done:
+                if not self.controller.cc.setup_done:
                     main_menu = self.main_menu('disabled')
                 else:
                     main_menu = self.main_menu()
@@ -1338,7 +1321,7 @@ class View(customtkinter.CTk):
                 edit_pin_label.place(relx=0.33, rely=0.45, anchor="w")
                 edit_pin_entry = View.create_entry(self, "*")
                 self.after(100, edit_pin_entry.focus_force)
-                if self.controller.card_type == "Satodime":
+                if self.controller.cc.card_type == "Satodime":
                     edit_pin_entry.configure(state='disabled')
                 edit_pin_entry.place(relx=0.327, rely=0.52, anchor="w")
 
@@ -1347,7 +1330,7 @@ class View(customtkinter.CTk):
                 edit_confirm_pin_label.configure(font=self.make_text_size_at(18))
                 edit_confirm_pin_label.place(relx=0.33, rely=0.65, anchor="w")
                 edit_confirm_pin_entry = View.create_entry(self, "*")
-                if self.controller.card_type == "Satodime":
+                if self.controller.cc.card_type == "Satodime":
                     edit_confirm_pin_entry.configure(state='disabled')
                 edit_confirm_pin_entry.place(relx=0.327, rely=0.72, anchor="w")
                 logger.debug("PIN entry fields created and placed")
@@ -1510,6 +1493,12 @@ class View(customtkinter.CTk):
                         generate_with_passphrase = False
                         passphrase_entry.place_forget()
 
+            def update_verify_pin():
+                if self.controller.cc.is_pin_set():
+                    self.controller.cc.card_verify_PIN_simple()
+                else:
+                    self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
+
             try:
                 logger.debug("Setting up radio buttons and entry fields")
                 radio_button_import_seed = customtkinter.CTkRadioButton(self.current_frame,
@@ -1583,33 +1572,31 @@ class View(customtkinter.CTk):
                 self.cancel_button = View.create_button(self, "Back",
                                                         command=lambda: self.start_setup()
                                                         )
+                self.cancel_button.place(relx=0.85, rely=0.9, anchor="w")
 
                 self.finish_button = View.create_button(self, "Import",
-                                                        command=lambda: self.controller.import_seed(
-                                                            self.text_box.get(1.0, "end-1c"),
-                                                            passphrase_entry.get() if generate_with_passphrase else None,
-                                                        ))
-
+                                                        command=lambda: [
+                                                            update_verify_pin(),
+                                                            self.controller.import_seed(
+                                                                self.text_box.get(1.0, "end-1c"),
+                                                                passphrase_entry.get() if generate_with_passphrase else None,
+                                                            )
+                                                        ])
+                # self.finish_button.place(relx=0.85, rely=0.9, anchor="w")
                 logger.debug("Radio buttons and entry fields set up")
 
             except Exception as e:
                 logger.error(f"An error occurred while setting up radio buttons and entry fields: {e}", exc_info=True)
 
-            try:
-                logger.debug("Placing finish button")
-                self.cancel_button.place(relx=0.85, rely=0.9, anchor="w")
-                #self.finish_button.place(relx=0.85, rely=0.9, anchor="w")
-                logger.debug("Finish button placed")
-
-                if self.card_type != "Satodime":
-                    logger.info("IN View.setup_my_card_seed() | Requesting card verification PIN")
-                    if self.controller.cc.is_pin_set():
-                        self.controller.cc.card_verify_PIN_simple()
-                    else:
-                        self.controller.PIN_dialog(f'Unlock your {self.card_type}')
-
-            except Exception as e:
-                logger.error(f"An error occurred while placing finish button: {e}", exc_info=True)
+            # try:
+            #     if self.controller.cc.card_type != "Satodime":
+            #         logger.info("IN View.setup_my_card_seed() | Requesting card verification PIN")
+            #         if self.controller.cc.is_pin_set():
+            #             self.controller.cc.card_verify_PIN_simple()
+            #         else:
+            #             self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
+            # except Exception as e:
+            #     logger.error(f"An error occurred while placing finish button: {e}", exc_info=True)
 
             logger.debug("Exiting setup_my_card_seed method successfully")
         except Exception as e:
@@ -1747,7 +1734,7 @@ class View(customtkinter.CTk):
                 logger.debug("Creating header")
 
                 header_conditional_title = "Edit Label"
-                header_conditional_label = f"Find a friendly name for your {self.card_type} Card."
+                header_conditional_label = f"Find a friendly name for your {self.controller.cc.card_type} Card."
 
                 self.header = View.create_an_header(self,
                                                     header_conditional_title,
@@ -1760,7 +1747,7 @@ class View(customtkinter.CTk):
 
             try:
                 logger.debug("setup paragraph")
-                text = View.create_label(self, f"Edit the label of your {self.card_type}.")
+                text = View.create_label(self, f"Edit the label of your {self.controller.cc.card_type}.")
                 text.place(relx=0.33, rely=0.17, anchor="w")
                 text = View.create_label(self,
                                          "The label is a tag that identifies your card. It can be used to distinguish ")
@@ -1798,19 +1785,19 @@ class View(customtkinter.CTk):
                 logger.debug("Cancel and finish buttons created and placed")
             except Exception as e:
                 logger.error(f"An error occurred while creating cancel and finish buttons: {e}", exc_info=True)
-            if self.card_type != "Satodime":
+            if self.controller.cc.card_type != "Satodime":
                 logger.info("IN View.change_pin() | Requesting card verification PIN")
                 if self.controller.cc.is_pin_set():
                     self.controller.cc.card_verify_PIN_simple()
                 else:
-                    self.controller.PIN_dialog(f'Unlock your {self.card_type}')
+                    self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
 
             logger.debug("Exiting edit_label method successfully")
         except Exception as e:
             logger.error(f"An unexpected error occurred in edit_label: {e}", exc_info=True)
 
     def check_authenticity(self):
-        if self.controller.card_present:
+        if self.controller.cc.card_present:
             logger.info("Card detected: checkin authenticity")
             is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.controller.cc.card_verify_authenticity()
 
@@ -1856,16 +1843,13 @@ class View(customtkinter.CTk):
                     logger.error(f"An error occurred in update_radio_selection: {e}", exc_info=True)
 
             try:
-
                 text = View.create_label(self, f"Check whether or not you have a genuine Satochip card.")
                 text.place(relx=0.33, rely=0.17, anchor="w")
 
                 text = View.create_label(self, f"Status:")
                 text.configure(font=self.make_text_bold())
                 text.place(relx=0.33, rely=0.27, anchor="w")
-                if self.controller.card_present:
-                    logger.info("Card detected: checkin authenticity")
-
+                if self.controller.cc.card_present:
                     if is_authentic:
                         icon_image = Image.open("./pictures_db/icon_genuine_card.jpg")
                         icon = customtkinter.CTkImage(light_image=icon_image, size=(30, 30))
@@ -1876,10 +1860,7 @@ class View(customtkinter.CTk):
                                                                                        size=18,
                                                                                        weight="normal"))
                         icon_label.place(relx=0.4, rely=0.267, anchor="w")
-
                     else:
-
-
                         icon_image = Image.open("./pictures_db/icon_not_genuine_card.jpg")
                         icon = customtkinter.CTkImage(light_image=icon_image, size=(30, 30))
                         icon_label = customtkinter.CTkLabel(self.current_frame, image=icon,
@@ -1901,11 +1882,6 @@ class View(customtkinter.CTk):
                         text = View.create_label(self,
                                                  f"Contact support@satochip.io to report any suspicious device.")
                         text.place(relx=0.33, rely=0.9, anchor="w")
-
-
-
-
-
 
                 logger.debug("Setting up radio buttons")
                 self.root_ca_certificate = customtkinter.CTkRadioButton(self.current_frame,
@@ -1961,7 +1937,7 @@ class View(customtkinter.CTk):
                 self.cancel_button = View.create_button(self, "Back",
                                                         lambda: self.start_setup())
                 self.cancel_button.place(relx=0.85, rely=0.9, anchor="w")
-                if self.card_type != "Satodime":
+                if self.controller.cc.card_type != "Satodime":
                     try:
                         self.controller.cc.card_verify_PIN_simple()
                     except Exception as e:
@@ -2073,7 +2049,7 @@ class View(customtkinter.CTk):
 
             try:
                 logger.info("Creating header")
-                self.header = View.create_an_header(self, f"Reset Your {self.controller.card_type}", "reset_popup.jpg")
+                self.header = View.create_an_header(self, f"Reset Your {self.controller.cc.card_type}", "reset_popup.jpg")
                 self.header.place(relx=0.32, rely=0.05, anchor="nw")
                 logger.debug("Header created and placed")
 
@@ -2209,12 +2185,12 @@ class View(customtkinter.CTk):
                 self.canvas.create_image(0, 0, image=self.background_photo, anchor="nw")
 
                 def unlock():
-                    if self.card_type != "Satodime":
+                    if self.controller.cc.card_type != "Satodime":
                         if self.controller.cc.is_pin_set():
                             self.controller.cc.card_verify_PIN_simple()
                         else:
                             try:
-                                self.controller.PIN_dialog(f'Unlock your {self.card_type}')
+                                self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
                             except Exception as e:
                                 self.start_setup()
                     self.update_status()
@@ -2225,35 +2201,43 @@ class View(customtkinter.CTk):
                 card_information.place(relx=0.33, rely=0.25, anchor="w")
                 card_information.configure(font=self.make_text_bold())
 
-                self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
+                applet_version = self.create_label(f"Applet version: {self.controller.card_status['applet_full_version_string']}")
                 if self.controller.cc.card_type == "Satodime" or self.controller.cc.is_pin_set():
                     if self.controller.cc.card_type != "Satodime":
                         self.controller.cc.card_verify_PIN_simple()
-                    self.card_label_named = self.create_label(f"Label: [{self.controller.get_card_label_infos()}]")
+                    card_label_named = self.create_label(f"Label: [{self.controller.get_card_label_infos()}]")
                     is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.controller.cc.card_verify_authenticity()
                     if is_authentic:
-                        self.card_genuine = self.create_label(f"Genuine: YES")
+                        card_genuine = self.create_label(f"Genuine: YES")
                     else:
-                        self.card_genuine = self.create_label("Genuine: NO")
+                        card_genuine = self.create_label("Genuine: NO")
+                elif not self.controller.cc.setup_done:
+                    watch_all = self.create_label("Card requires setup")
+                    watch_all.place(relx=0.33, rely=0.17)
+                    unlock_button = self.create_button("Setup card", lambda: self.setup_my_card_pin())
+                    unlock_button.configure(font=self.make_text_size_at(15))
+                    unlock_button.place(relx= 0.55, rely=0.17)
+                    card_label_named = self.create_label(f"Label: [UNKNOWN]")
+                    card_genuine = self.create_label(f"Genuine: [UNKNOWN]")
                 else:
-                    self.watch_all = self.create_label("PIN required to look at complete information")
-                    self.watch_all.place(relx=0.33, rely=0.17)
-                    self.unlock_button = self.create_button("Unlock", lambda: [unlock()])
-                    self.unlock_button.configure(font=self.make_text_size_at(15))
-                    self.unlock_button.place(relx=0.75, rely=0.17)
-                    self.card_label_named = self.create_label(f"Label: [UNKNOWN]")
-                    self.card_genuine = self.create_label(f"Genuine: [UNKNOWN]")
+                    watch_all = self.create_label("PIN required to look at complete information")
+                    watch_all.place(relx=0.33, rely=0.17)
+                    unlock_button = self.create_button("Unlock", lambda: [unlock()])
+                    unlock_button.configure(font=self.make_text_size_at(15))
+                    unlock_button.place(relx=0.75, rely=0.17)
+                    card_label_named = self.create_label(f"Label: [UNKNOWN]")
+                    card_genuine = self.create_label(f"Genuine: [UNKNOWN]")
 
-                self.card_label_named.place(relx=0.33, rely=0.28)
-                self.applet_version.place(relx=0.33, rely=0.33)
-                self.card_genuine.place(relx=0.33, rely=0.38)
+                card_label_named.place(relx=0.33, rely=0.28)
+                applet_version.place(relx=0.33, rely=0.33)
+                card_genuine.place(relx=0.33, rely=0.38)
 
                 # card configuration
                 card_configuration = self.create_label("Card configuration")
                 card_configuration.place(relx=0.33, rely=0.48, anchor="w")
                 card_configuration.configure(font=self.make_text_bold())
                 if self.controller.cc.card_type != "Satodime":
-                    pin_information = self.create_label(f"Wrong PIN counter:[{self.controller.pin_left}] tries remaining")
+                    pin_information = self.create_label(f"PIN counter:[{self.controller.card_status['PIN0_remaining_tries']}] tries remaining")
                     pin_information.place(relx=0.33, rely=0.52)
                 else:
                     pin_information = self.create_label("No PIN required")
@@ -2261,9 +2245,9 @@ class View(customtkinter.CTk):
 
                 # for a next implementation of 2FA functionality you have the code below
                 if self.controller.cc.card_type == "Satochip":
-                    two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
+                    two_FA = self.create_label(f"2FA enabled" if self.controller.cc.needs_2FA else f"2FA disabled")
                     two_FA.place(relx=0.33, rely=0.58)
-                    # if self.controller.two_FA:
+                    # if self.controller.cc.needs_2FA:
                     #     self.button_2FA = self.create_button("Disable 2FA", None)
                     # else:
                     #     self.button_2FA = self.create_button("Enable 2FA")
@@ -2275,10 +2259,10 @@ class View(customtkinter.CTk):
                 card_connectivity.place(relx=0.33, rely=0.68, anchor="w")
                 card_connectivity.configure(font=self.make_text_bold())
 
-                if self.controller.nfc == 0:
+                if self.controller.cc.nfc_policy == 0:
                     nfc = self.create_label(f"NFC enabled")
                     #self.button_nfc = self.create_button("Disable NFC")
-                elif self.controller.nfc == 1:
+                elif self.controller.cc.nfc_policy == 1:
                     nfc = self.create_label(f"NFC disabled:")
                     #self.button_nfc = self.create_button("Enable NFC")
                 else:
@@ -2291,14 +2275,14 @@ class View(customtkinter.CTk):
                 software_information = self.create_label("Software information")
                 software_information.place(relx=0.33, rely=0.81, anchor="w")
                 software_information.configure(font=self.make_text_bold())
-                self.app_version = self.create_label(f"Satochip-utils version: {APP_VERSION}")
-                self.app_version.place(relx=0.33, rely=0.83)
-                self.pysatochip_version = self.create_label(f"Pysatochip version: {PYSATOCHIP_VERSION}")
-                self.pysatochip_version.place(relx=0.33, rely=0.88)
-                self.back_button = View.create_button(self,
+                app_version = self.create_label(f"Satochip-utils version: {APP_VERSION}")
+                app_version.place(relx=0.33, rely=0.83)
+                pysatochip_version = self.create_label(f"Pysatochip version: {PYSATOCHIP_VERSION}")
+                pysatochip_version.place(relx=0.33, rely=0.88)
+                back_button = View.create_button(self,
                                                        'Back',
                                                        lambda: self.start_setup())
-                self.back_button.place(relx=0.85, rely=0.9, anchor="w")
+                back_button.place(relx=0.85, rely=0.9, anchor="w")
 
                 logger.debug("Header created and placed")
             except Exception as e:

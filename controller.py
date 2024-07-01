@@ -1,7 +1,6 @@
 import logging
-from os import urandom, path
+from os import urandom
 import sys
-from configparser import ConfigParser
 from mnemonic import Mnemonic
 from pysatochip.CardConnector import (CardConnector, UninitializedSeedError)
 
@@ -24,7 +23,6 @@ class Controller:
         logger.setLevel(loglevel)
         self.view = view
         self.view.controller = self
-        self.pin_left = None
 
         try:
             self.cc = CardConnector(self, loglevel=loglevel)
@@ -33,77 +31,79 @@ class Controller:
             logger.error("Failed to initialize CardConnector.", exc_info=True)
             raise
 
-        self.show_popup_open = False
+        #self.show_popup_open = False
 
         # card infos
-        self.card_present = None
-        self.card_version = None
-        self.needs2FA = None
-        self.is_seeded = None
-        self.setup_done = None
-        self.card_type = None
-        self.card_label = None
-        self.two_FA = None
+        self.card_status = None
+        self.pin_left = None
+        # self.card_present = None
+        # self.card_version = None
+        # self.needs2FA = None
+        # self.is_seeded = None
+        # self.setup_done = None
+        # self.card_type = None
+        # self.card_label = None
+        # self.two_FA = None
 
-        try:
-            if self.cc.card_type == "Satodime":
-                self.truststore = {}
-                self.authentikey = None
-                self.authentikey_comp_hex = None
-                self.window = None
-                self.max_num_keys = 0
-                self.satodime_keys_status = []
-                self.satodime_keys_info = []
-                self.card_event = True  # force update at start
-                self.card_event_slots = []
-
-            elif self.cc.card_type == "SeedKeeper":
-                self.truststore = {}
-                self.card_event = False
-            logger.info(f"Initialization complete for card type: {self.cc.card_type}")
-        except Exception as e:
-            logger.error("Error during initialization of card-specific settings.", exc_info=True)
-            raise
+        # try:
+        #     if self.cc.card_type == "Satodime":
+        #         #self.truststore = {}
+        #         #self.authentikey = None
+        #         #self.authentikey_comp_hex = None
+        #         #self.window = None
+        #         #self.max_num_keys = 0
+        #         #self.satodime_keys_status = []
+        #         #self.satodime_keys_info = []
+        #         #self.card_event = True  # force update at start
+        #         #self.card_event_slots = []
+        #
+        #     elif self.cc.card_type == "SeedKeeper":
+        #         #self.truststore = {}
+        #         #self.card_event = False
+        #     logger.info(f"Initialization complete for card type: {self.cc.card_type}")
+        # except Exception as e:
+        #     logger.error("Error during initialization of card-specific settings.", exc_info=True)
+        #     raise
 
     def get_card_status(self):
         if self.cc.card_present:
             logger.info("In get_card_status")
             try:
-                response, sw1, sw2, d = self.cc.card_get_status()
-                card_status = d
-                if card_status:
-                    logger.info("Card satus is not None")
-                    logger.debug(f"{d}")
+                response, sw1, sw2, self.card_status = self.cc.card_get_status()
+                if self.card_status:
+                    logger.debug(f"Card satus: {self.card_status}")
                 else:
-                    logger.error(f"Failed to retrieve card_status, card_status is: {card_status}")
+                    logger.error(f"Failed to retrieve card_status")
 
-                self.card_present = True if self.cc.card_present else False
+                #self.card_present = True if self.cc.card_present else False
                 # self.card_is_pin = card_status['card_is_pin']
-                self.card_version = card_status['applet_major_version']
-                self.needs2FA = card_status['needs2FA']
-                self.is_seeded = card_status['is_seeded']
-                self.setup_done = card_status['setup_done']
-                self.card_type = self.cc.card_type
-                self.pin_left = card_status['PIN0_remaining_tries']
-                self.two_FA = card_status['needs2FA']
-                self.nfc = self.cc.nfc_policy
-                self.applet_version = f"{card_status['protocol_major_version']}.{card_status['protocol_minor_version']}-{card_status['applet_major_version']}.{card_status['applet_minor_version']}"
+                # self.card_version = card_status['applet_major_version']
+                # self.needs2FA = card_status['needs2FA']
+                # self.is_seeded = card_status['is_seeded']
+                # self.setup_done = card_status['setup_done']
+                # self.card_type = self.cc.card_type
+                # self.pin_left = card_status['PIN0_remaining_tries']
+                # self.two_FA = card_status['needs2FA']
+                # self.nfc = self.cc.nfc_policy
+                self.card_status['applet_full_version_string'] = f"{self.card_status['protocol_major_version']}.{self.card_status['protocol_minor_version']}-{self.card_status['applet_major_version']}.{self.card_status['applet_minor_version']}"
 
                 # self.card_label = self.cc.card_label
 
-                return (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                        self.setup_done, self.card_type, self.pin_left)
+                # return (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
+                #         self.setup_done, self.card_type, self.pin_left)
+                return self.card_status
 
             except Exception as e:
                 logger.error(f"Failed to retrieve card status: {e}")
                 # Vous pouvez également ajouter d'autres actions en cas d'erreur, comme définir des valeurs par défaut
-                self.card_present = False
-                self.card_version = None
-                self.needs2FA = None
-                self.is_seeded = None
-                self.setup_done = None
-                self.card_type = None
-                self.card_label = None
+                # self.card_present = False
+                # self.card_version = None
+                # self.needs2FA = None
+                # self.is_seeded = None
+                # self.setup_done = None
+                # self.card_type = None
+                # self.card_label = None
+                self.card_status = None
 
     def request(self, request_type, *args):
         logger.info(str(request_type))
@@ -263,12 +263,12 @@ class Controller:
 
             while True:
                 try:
-                    logger.debug("Requesting passphrase")
+                    logger.debug("Requesting PIN")
                     pin = self.view.get_passphrase(msg)
-                    logger.debug(f"Passphrase received: pin={'***' if pin else None}")
+                    logger.debug(f"PIN received: pin={'***' if pin else None}")
 
                     if pin is None:
-                        logger.info("Passphrase request cancelled or window closed")
+                        logger.info("PIN request cancelled or window closed")
                         self.view.show("INFO",
                                        'Device cannot be unlocked without PIN code!',
                                        'Ok',
@@ -293,17 +293,15 @@ class Controller:
                             self.cc.card_verify_PIN_simple(pin)
                             break
                         except Exception as e:
-                            logger.info("exception from pin dialog")
+                            logger.info(f"exception from PIN dialog: {e}")
                             self.view.show('ERROR', str(e), 'Ok', None,
                                            "./pictures_db/icon_change_pin_popup.jpg")
 
                 except Exception as e:
-                    logger.error(f"An error occurred while requesting passphrase: {e}", exc_info=True)
-                    return (False, None)
+                    logger.error(f"An error occurred while requesting PIN: {e}", exc_info=True)
 
         except Exception as e:
             logger.critical(f"An unexpected error occurred in PIN_dialog: {e}", exc_info=True)
-            return (False, None)
 
     # only for satochip and seedkeeper
     def card_setup_native_pin(self, pin):
