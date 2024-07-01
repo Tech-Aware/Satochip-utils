@@ -30,7 +30,7 @@ TEXT_COLOR = "black"
 
 ICON_PATH = "./pictures_db/icon_"
 
-APP_VERSION = "0.4.1"
+APP_VERSION = "0.1.0"
 
 
 class View(customtkinter.CTk):
