@@ -57,32 +57,6 @@ class Controller:
                 self.card_event = True  # force update at start
                 self.card_event_slots = []
 
-                # get apikeys from file
-                self.apikeys = {}
-                try:
-                    if getattr(sys, 'frozen', False):
-                        if sys.platform == "darwin":  # MacOS
-                            self.pkg_dir = sys._MEIPASS + "/SatodimeTool"  # for pyinstaller
-                        else:
-                            self.pkg_dir = sys._MEIPASS  # for pyinstaller
-                    else:
-                        self.pkg_dir = path.split(path.realpath(__file__))[0]
-
-                    apikeys_path = path.join(self.pkg_dir, "api_keys.ini")
-                    config = ConfigParser()
-                    if path.isfile(apikeys_path):
-                        config.read(apikeys_path)
-                        if config.has_section('APIKEYS'):
-                            self.apikeys = config['APIKEYS']
-                            logger.debug(f'APIKEYS loaded: {self.apikeys}')
-                        else:
-                            logger.warning("APIKEYS section not found in the configuration file.")
-                    else:
-                        logger.warning("API keys file not found.")
-                except Exception as e:
-                    logger.error("Error reading API keys.", exc_info=True)
-                    raise
-
             elif self.cc.card_type == "SeedKeeper":
                 self.truststore = {}
                 self.card_event = False
@@ -207,7 +181,7 @@ class Controller:
                 mnemonic = MNEMONIC.generate(strength=strength)
                 return mnemonic
             else:
-                logger.warning("generate_random_seed: invalid mnemonic length {mnemonic_length}")
+                logger.warning(f"generate_random_seed: invalid mnemonic length {mnemonic_length}")
                 return f"Error: invalid mnemonic length {mnemonic_length}"
 
         except Exception as e:
@@ -379,7 +353,6 @@ class Controller:
             # Option: setup 2-Factor-Authentication (2FA)
             # self.init_2FA()
             # seed dialog...
-            logger.info(f"seed: {seed}")
             authentikey = self.cc.card_bip32_import_seed(seed)
             logger.info(f"authentikey: {authentikey}")
             if authentikey:
@@ -397,16 +370,3 @@ class Controller:
             else:
                 self.view.show('ERROR', 'Error when importing seed to Satochip!', 'Ok', None,
                                "./pictures_db/icon_seed_popup.jpg")
-
-    # def check_card_authenticity(self):
-    #     logger.info("check_card_authenticity")
-    #     if self.card_present:
-    #         is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.cc.card_verify_authenticity()
-    #         logger.info(f"is_authentic: {is_authentic}")
-    #         logger.info(f"txt_ca: {txt_ca}")
-    #         logger.info(f"txt_subca: {txt_subca}")
-    #         logger.info(f"txt_device: {txt_device}")
-    #         logger.info(f"txt_error: {txt_error}")
-    #         return is_authentic, txt_ca, txt_subca, txt_device, txt_error
-    #     else:
-    #         pass

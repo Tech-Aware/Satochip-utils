@@ -1434,7 +1434,6 @@ class View(customtkinter.CTk):
                 elif radio_value_mnemonic.get() == "generate_24":
                     logger.debug("Generate seed of 24 words")
                     mnemonic_length = 24
-                    logger.info(f"in update radio selection mnemonic: generate 24: {mnemonic_length}")
 
                 mnemonic = self.controller.generate_random_seed(mnemonic_length)
                 self.update_textbox(mnemonic)
