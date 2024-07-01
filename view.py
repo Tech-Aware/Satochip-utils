@@ -863,7 +863,7 @@ class View(customtkinter.CTk):
                     self.create_button_for_main_menu_item(
                         menu_frame,
                         "Reset my Card",
-                        "reset_locked.png",
+                        "reset_locked.jpg",
                         0.54, 0.595,
                         command=lambda: None, state='disabled'
                     )
@@ -1727,6 +1727,8 @@ class View(customtkinter.CTk):
         if self.controller.cc.card_present:
             logger.info("Card detected: checkin authenticity")
             is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.controller.cc.card_verify_authenticity()
+            if txt_error != "":
+                txt_device = txt_error + "\n------------------\n" + txt_device
 
         try:
             logger.info("IN View.check_authenticity | Entering check_authenticity method")
@@ -1757,15 +1759,15 @@ class View(customtkinter.CTk):
                     if certificate_radio_value.get() == 'root_ca_certificate':
                         logger.info(f"Button clicked: {certificate_radio_value.get()}")
                         self.update_textbox(txt_ca)
-                        self.text_box.place(relx=0.33, rely=0.6, anchor="w")
+                        self.text_box.place(relx=0.33, rely=0.4, anchor="nw")
                     if certificate_radio_value.get() == 'sub_ca_certificate':
                         logger.info(f"Button clicked: {certificate_radio_value.get()}")
                         self.update_textbox(txt_subca)
-                        self.text_box.place(relx=0.33, rely=0.6, anchor="w")
+                        self.text_box.place(relx=0.33, rely=0.4, anchor="nw")
                     if certificate_radio_value.get() == 'device_certificate':
                         logger.info(f"Button clicked: {certificate_radio_value.get()}")
                         self.update_textbox(txt_device)
-                        self.text_box.place(relx=0.33, rely=0.6, anchor="w") if is_authentic else self.text_box.place(relx=0.33, rely=0.52, anchor="w")
+                        self.text_box.place(relx=0.33, rely=0.4, anchor="nw")
                 except Exception as e:
                     logger.error(f"An error occurred in update_radio_selection: {e}", exc_info=True)
 
@@ -1808,7 +1810,7 @@ class View(customtkinter.CTk):
                         text.place(relx=0.33, rely=0.8, anchor="w")
                         text = View.create_label(self,
                                                  f"Contact support@satochip.io to report any suspicious device.")
-                        text.place(relx=0.33, rely=0.9, anchor="w")
+                        text.place(relx=0.33, rely=0.85, anchor="w")
 
                 logger.debug("Setting up radio buttons")
                 self.root_ca_certificate = customtkinter.CTkRadioButton(self.current_frame,
@@ -1821,7 +1823,7 @@ class View(customtkinter.CTk):
                                                                         bg_color="whitesmoke", fg_color="green",
                                                                         hover_color="green",
                                                                         command=update_radio_selection)
-                self.root_ca_certificate.place(relx=0.33, rely=0.35, anchor="w") if is_authentic else None
+                self.root_ca_certificate.place(relx=0.33, rely=0.35, anchor="w")
 
                 self.sub_ca_certificate = customtkinter.CTkRadioButton(self.current_frame,
                                                                        text="Sub CA certificate",
@@ -1833,7 +1835,7 @@ class View(customtkinter.CTk):
                                                                        bg_color="whitesmoke", fg_color="green",
                                                                        hover_color="green",
                                                                        command=update_radio_selection)
-                self.sub_ca_certificate.place(relx=0.50, rely=0.35, anchor="w") if is_authentic else None
+                self.sub_ca_certificate.place(relx=0.50, rely=0.35, anchor="w")
 
                 self.device_certificate = customtkinter.CTkRadioButton(self.current_frame,
                                                                        text="Device certificate",
@@ -1845,7 +1847,7 @@ class View(customtkinter.CTk):
                                                                        bg_color="whitesmoke", fg_color="green",
                                                                        hover_color="green",
                                                                        command=update_radio_selection)
-                self.device_certificate.place(relx=0.67, rely=0.35, anchor="w") if is_authentic else self.device_certificate.place(relx=0.33, rely=0.35, anchor="w")
+                self.device_certificate.place(relx=0.67, rely=0.35, anchor="w")
                 logger.debug("Radio buttons set up")
             except Exception as e:
                 logger.error(f"An error occurred while setting up radio buttons: {e}", exc_info=True)
