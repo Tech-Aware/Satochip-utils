@@ -31,39 +31,8 @@ class Controller:
             logger.error("Failed to initialize CardConnector.", exc_info=True)
             raise
 
-        #self.show_popup_open = False
-
         # card infos
         self.card_status = None
-        self.pin_left = None
-        # self.card_present = None
-        # self.card_version = None
-        # self.needs2FA = None
-        # self.is_seeded = None
-        # self.setup_done = None
-        # self.card_type = None
-        # self.card_label = None
-        # self.two_FA = None
-
-        # try:
-        #     if self.cc.card_type == "Satodime":
-        #         #self.truststore = {}
-        #         #self.authentikey = None
-        #         #self.authentikey_comp_hex = None
-        #         #self.window = None
-        #         #self.max_num_keys = 0
-        #         #self.satodime_keys_status = []
-        #         #self.satodime_keys_info = []
-        #         #self.card_event = True  # force update at start
-        #         #self.card_event_slots = []
-        #
-        #     elif self.cc.card_type == "SeedKeeper":
-        #         #self.truststore = {}
-        #         #self.card_event = False
-        #     logger.info(f"Initialization complete for card type: {self.cc.card_type}")
-        # except Exception as e:
-        #     logger.error("Error during initialization of card-specific settings.", exc_info=True)
-        #     raise
 
     def get_card_status(self):
         if self.cc.card_present:
@@ -75,35 +44,13 @@ class Controller:
                 else:
                     logger.error(f"Failed to retrieve card_status")
 
-                #self.card_present = True if self.cc.card_present else False
-                # self.card_is_pin = card_status['card_is_pin']
-                # self.card_version = card_status['applet_major_version']
-                # self.needs2FA = card_status['needs2FA']
-                # self.is_seeded = card_status['is_seeded']
-                # self.setup_done = card_status['setup_done']
-                # self.card_type = self.cc.card_type
-                # self.pin_left = card_status['PIN0_remaining_tries']
-                # self.two_FA = card_status['needs2FA']
-                # self.nfc = self.cc.nfc_policy
                 self.card_status['applet_full_version_string'] = f"{self.card_status['protocol_major_version']}.{self.card_status['protocol_minor_version']}-{self.card_status['applet_major_version']}.{self.card_status['applet_minor_version']}"
-
-                # self.card_label = self.cc.card_label
-
-                # return (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                #         self.setup_done, self.card_type, self.pin_left)
                 return self.card_status
 
             except Exception as e:
                 logger.error(f"Failed to retrieve card status: {e}")
-                # Vous pouvez également ajouter d'autres actions en cas d'erreur, comme définir des valeurs par défaut
-                # self.card_present = False
-                # self.card_version = None
-                # self.needs2FA = None
-                # self.is_seeded = None
-                # self.setup_done = None
-                # self.card_type = None
-                # self.card_label = None
                 self.card_status = None
+                return None
 
     def request(self, request_type, *args):
         logger.info(str(request_type))
@@ -221,9 +168,7 @@ class Controller:
             logger.info(f"New label to set: {label}")
             (response, sw1, sw2) = self.cc.card_set_label(label)
             if sw1 == 0x90 and sw2 == 0x00:
-                response, sw1, sw2, label = self.cc.card_get_label()
                 logger.info(f"New label set successfully: {label}")
-                self.card_label = label
                 self.view.show("SUCCESS",
                                f"New label set successfully",
                                "Ok", self.view.start_setup(),
@@ -244,13 +189,16 @@ class Controller:
             response, sw1, sw2, label = self.cc.card_get_label()
             if label is None:
                 logger.info("Label is None")
+                return None
             if label == "":
                 logger.info("Label is Blank")
+                return ""
             else:
                 logger.info(f"Label found: {label}")
                 return label
         else:
-            logger.info("Card is not Satodime")
+            logger.info("In get_card_label_infos: No card present")
+            return None
 
     # for PIN
     def PIN_dialog(self, msg):
@@ -348,8 +296,6 @@ class Controller:
         try:
             authentikey = self.cc.card_bip32_get_authentikey()
         except UninitializedSeedError:
-            # Option: setup 2-Factor-Authentication (2FA)
-            # self.init_2FA()
             # seed dialog...
             authentikey = self.cc.card_bip32_import_seed(seed)
             logger.info(f"authentikey: {authentikey}")

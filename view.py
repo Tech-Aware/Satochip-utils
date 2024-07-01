@@ -40,16 +40,7 @@ class View(customtkinter.CTk):
             super().__init__()
 
             # status infos
-            # self.card_type = None
-            # self.setup_done = None
-            # self.is_seeded = None
-            # self.needs2FA = None
-            # self.card_version = None
-            # self.card_present = None
-            # self.card_label = None
-            # self.app_open = True
             self.welcome_in_display = True
-            # self.pin_left = None
 
             logger.setLevel(loglevel)
             logger.debug("Log level set to INFO")
@@ -76,6 +67,7 @@ class View(customtkinter.CTk):
 
             try:
                 # Widget declaration -> Maybe unnecessary but marked as error if not declared before
+                # TODO: clean code
                 logger.debug("Declaring widgets")
                 self.current_frame = None
                 self.canvas = None
@@ -948,22 +940,8 @@ class View(customtkinter.CTk):
                     try:
                         logger.info("Getting card status")
                         self.controller.get_card_status()
-                        # (self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                        #  self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
-                        logger.info("Card status retrieved successfully")
 
-                        #self.controller.card_event = True
-                        #logger.debug("Controller card event set to True")
-
-                        # logger.info(f"Card presence: {self.card_present}")
-                        # logger.info(f"Applet major version: {self.card_version}")
-                        # logger.info(f"Needs 2FA: {self.needs2FA}")
-                        # logger.info(f"Is seeded: {self.is_seeded}")
-                        # logger.info(f"Setup done: {self.setup_done}")
-                        # logger.info(f"Card type: {self.card_type}")
-                        # logger.info(f"Card label: {self.card_label}")
-
-                        if not self.welcome_in_display:
+                        if not self.welcome_in_display: # TODO?
                             self.start_setup()
                     except Exception as e:
                         logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
@@ -971,55 +949,14 @@ class View(customtkinter.CTk):
                 elif isConnected is False:
                     try:
                         logger.info("Card disconnected, resetting status")
-                        # self.card_present = None
-                        # self.card_version = None
-                        # self.needs2FA = None
-                        # self.is_seeded = None
-                        # self.setup_done = None
-                        # self.card_type = None
-                        # self.card_label = None
-
-                        #self.controller.card_event = False
-                        #logger.debug("Controller card event set to False")
-
-                        # logger.info(f"Card presence: {self.card_present}")
-                        # logger.info(f"Applet major version: {self.card_version}")
-                        # logger.info(f"Needs 2FA: {self.needs2FA}")
-                        # logger.info(f"Is seeded: {self.is_seeded}")
-                        # logger.info(f"Setup done: {self.setup_done}")
-                        # logger.info(f"Card type: {self.card_type}")
-                        # logger.info(f"Card label: {self.card_label}")
-                        # logger.info(f"Tries remaining:: {self.pin_left}")
-                        # if self.app_open:
-                        #     self.start_setup()
                         self.start_setup()
-
                     except Exception as e:
                         logger.error(f"An error occurred while resetting card status: {e}", exc_info=True)
                     logger.info("Exiting update_status method successfully")
 
                 else: # isConnected is None
                     pass
-                    #try:
-                        #logger.info("Getting card status")
-                        #(self.card_present, self.card_version, self.needs2FA, self.is_seeded,
-                        # self.setup_done, self.card_type, self.pin_left) = self.controller.get_card_status()
-                        #logger.info("Card status retrieved successfully")
 
-                        #self.controller.card_event = True
-                        #logger.debug("Controller card event set to True")
-
-                        # logger.info(f"Card presence: {self.card_present}")
-                        # logger.info(f"Applet major version: {self.card_version}")
-                        # logger.info(f"Needs 2FA: {self.needs2FA}")
-                        # logger.info(f"Is seeded: {self.is_seeded}")
-                        # logger.info(f"Setup done: {self.setup_done}")
-                        # logger.info(f"Card type: {self.card_type}")
-                        # logger.info(f"Card label: {self.card_label}")
-                        # logger.info(f"Tries remaining:: {self.pin_left}")
-
-                    #except Exception as e:
-                    #    logger.error(f"An error occurred while getting card status: {e}", exc_info=True)
         except Exception as e:
             logger.error(f"An unexpected error occurred in update_status method: {e}", exc_info=True)
 
@@ -1587,16 +1524,6 @@ class View(customtkinter.CTk):
 
             except Exception as e:
                 logger.error(f"An error occurred while setting up radio buttons and entry fields: {e}", exc_info=True)
-
-            # try:
-            #     if self.controller.cc.card_type != "Satodime":
-            #         logger.info("IN View.setup_my_card_seed() | Requesting card verification PIN")
-            #         if self.controller.cc.is_pin_set():
-            #             self.controller.cc.card_verify_PIN_simple()
-            #         else:
-            #             self.controller.PIN_dialog(f'Unlock your {self.controller.cc.card_type}')
-            # except Exception as e:
-            #     logger.error(f"An error occurred while placing finish button: {e}", exc_info=True)
 
             logger.debug("Exiting setup_my_card_seed method successfully")
         except Exception as e:
