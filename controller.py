@@ -284,7 +284,6 @@ class Controller:
             logger.info("Entering PIN_dialog method")
 
             def switch_unlock_to_false_and_quit():
-                self.view.spot_if_unlock = False
                 self.view.start_setup()
                 self.view.update_status()
 

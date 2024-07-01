@@ -49,7 +49,6 @@ class View(customtkinter.CTk):
             self.card_label = None
             self.app_open = True
             self.welcome_in_display = True
-            self.spot_if_unlock = False
             self.pin_left = None
 
             logger.setLevel(loglevel)
@@ -1859,7 +1858,7 @@ class View(customtkinter.CTk):
 
             try:
 
-                text = View.create_label(self, f"Check whether or not you have a genuine Satochip S.R.L. card.")
+                text = View.create_label(self, f"Check whether or not you have a genuine Satochip card.")
                 text.place(relx=0.33, rely=0.17, anchor="w")
 
                 text = View.create_label(self, f"Status:")
@@ -2162,6 +2161,9 @@ class View(customtkinter.CTk):
             logger.error(f"An unexpected error occurred in reset_my_card_window: {e}", exc_info=True)
 
     def about(self):
+        # TODO: add reset seed button (for satochip only)
+        # TODO: implement nfc enable/disable (depending on card & version)
+        # TODO: implement 2FA disable/enable (only satochip)
 
         try:
             logger.info("IN View.edit_label() | Entering edit_label method")
@@ -2211,52 +2213,36 @@ class View(customtkinter.CTk):
                     if self.card_type != "Satodime":
                         if self.controller.cc.is_pin_set():
                             self.controller.cc.card_verify_PIN_simple()
-                            self.spot_if_unlock = True
-                            self.update_status()
-                            self.about()
                         else:
                             try:
                                 self.controller.PIN_dialog(f'Unlock your {self.card_type}')
-                                self.spot_if_unlock = True
-                                self.update_status()
-                                self.about()
                             except Exception as e:
-                                switch_unlock_to_false_and_quit()
-                    else:
-                        self.spot_if_unlock = True
-                        self.update_status()
-                        self.about()
-                        self.unlock_button.configure(state='disabled')
-                        self.watch_all.configure(text="No PIN required for Satodime")
-
-                def switch_unlock_to_false_and_quit():
-                    self.spot_if_unlock = False
-                    self.start_setup()
-
-                logger.info(f"self.spot_if_unlock is: {self.spot_if_unlock}")
-                self.watch_all = self.create_label("PIN required to look at complete information")
-                self.unlock_button = self.create_button("Unlock", lambda: [unlock()])
-                self.watch_all.place(relx=0.33, rely=0.17)
-                self.unlock_button.configure(font=self.make_text_size_at(15))
-                self.unlock_button.place(relx=0.7, rely=0.16)
+                                self.start_setup()
+                    self.update_status()
+                    self.about()
 
                 # card infos
                 card_information = self.create_label("Card information")
                 card_information.place(relx=0.33, rely=0.25, anchor="w")
                 card_information.configure(font=self.make_text_bold())
 
-                if self.spot_if_unlock:
-                    self.unlock_button.configure(state='disabled')
+                self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
+                if self.controller.cc.card_type == "Satodime" or self.controller.cc.is_pin_set():
+                    if self.controller.cc.card_type != "Satodime":
+                        self.controller.cc.card_verify_PIN_simple()
                     self.card_label_named = self.create_label(f"Label: [{self.controller.get_card_label_infos()}]")
-                    self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
                     is_authentic, txt_ca, txt_subca, txt_device, txt_error = self.controller.cc.card_verify_authenticity()
                     if is_authentic:
                         self.card_genuine = self.create_label(f"Genuine: YES")
                     else:
                         self.card_genuine = self.create_label("Genuine: NO")
                 else:
+                    self.watch_all = self.create_label("PIN required to look at complete information")
+                    self.watch_all.place(relx=0.33, rely=0.17)
+                    self.unlock_button = self.create_button("Unlock", lambda: [unlock()])
+                    self.unlock_button.configure(font=self.make_text_size_at(15))
+                    self.unlock_button.place(relx=0.75, rely=0.17)
                     self.card_label_named = self.create_label(f"Label: [UNKNOWN]")
-                    self.applet_version = self.create_label(f"Applet version: {self.controller.applet_version}")
                     self.card_genuine = self.create_label(f"Genuine: [UNKNOWN]")
 
                 self.card_label_named.place(relx=0.33, rely=0.28)
@@ -2267,18 +2253,23 @@ class View(customtkinter.CTk):
                 card_configuration = self.create_label("Card configuration")
                 card_configuration.place(relx=0.33, rely=0.48, anchor="w")
                 card_configuration.configure(font=self.make_text_bold())
-                pin_information = self.create_label(f"Wrong PIN counter:[{self.controller.pin_left}], tries remaining.")
-                pin_information.place(relx=0.33, rely=0.52)
+                if self.controller.cc.card_type != "Satodime":
+                    pin_information = self.create_label(f"Wrong PIN counter:[{self.controller.pin_left}] tries remaining")
+                    pin_information.place(relx=0.33, rely=0.52)
+                else:
+                    pin_information = self.create_label("No PIN required")
+                    pin_information.place(relx=0.33, rely=0.52)
 
                 # for a next implementation of 2FA functionality you have the code below
-                two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
-                two_FA.place(relx=0.33, rely=0.58)
-                if self.controller.two_FA:
-                    self.button_2FA = self.create_button("Disable 2FA", None)
-                else:
-                    self.button_2FA = self.create_button("Enable 2FA")
-                self.button_2FA.configure(font=self.make_text_size_at(15), state='disabled')
-                self.button_2FA.place(relx=0.5, rely=0.58)
+                if self.controller.cc.card_type == "Satochip":
+                    two_FA = self.create_label(f"2FA enabled" if self.controller.two_FA else f"2FA disabled")
+                    two_FA.place(relx=0.33, rely=0.58)
+                    # if self.controller.two_FA:
+                    #     self.button_2FA = self.create_button("Disable 2FA", None)
+                    # else:
+                    #     self.button_2FA = self.create_button("Enable 2FA")
+                    # self.button_2FA.configure(font=self.make_text_size_at(15), state='disabled')
+                    # self.button_2FA.place(relx=0.5, rely=0.58)
 
                 # card connectivity
                 card_connectivity = self.create_label("Card connectivity")
@@ -2287,17 +2278,15 @@ class View(customtkinter.CTk):
 
                 if self.controller.nfc == 0:
                     nfc = self.create_label(f"NFC enabled")
-                    self.button_nfc = self.create_button("Disable NFC")
-
+                    #self.button_nfc = self.create_button("Disable NFC")
                 elif self.controller.nfc == 1:
                     nfc = self.create_label(f"NFC disabled:")
-                    self.button_nfc = self.create_button("Enable NFC")
-
+                    #self.button_nfc = self.create_button("Enable NFC")
                 else:
                     nfc = self.create_label(f"NFC: [BLOCKED]")
                 nfc.place(relx=0.33, rely=0.715)
-                self.button_nfc.configure(font=self.make_text_size_at(15), state='disabled')
-                self.button_nfc.place(relx=0.5, rely=0.71)
+                #self.button_nfc.configure(font=self.make_text_size_at(15), state='disabled')
+                #self.button_nfc.place(relx=0.5, rely=0.71)
 
                 # software information
                 software_information = self.create_label("Software information")
@@ -2309,7 +2298,7 @@ class View(customtkinter.CTk):
                 self.pysatochip_version.place(relx=0.33, rely=0.88)
                 self.back_button = View.create_button(self,
                                                        'Back',
-                                                       lambda: switch_unlock_to_false_and_quit())
+                                                       lambda: self.start_setup())
                 self.back_button.place(relx=0.85, rely=0.9, anchor="w")
 
                 logger.debug("Header created and placed")
@@ -2317,5 +2306,3 @@ class View(customtkinter.CTk):
                 logger.error(f"An error occurred while creating header: {e}", exc_info=True)
         except Exception as e:
             logger.error(f"An error occurred while creating header: {e}", exc_info=True)
-
-
