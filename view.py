@@ -947,7 +947,7 @@ class View(customtkinter.CTk):
                     logger.info(f"Card removed for Reset Factory!")
                     try:
                         # Mettre à jour les labels et les boutons en fonction du retrait de la carte
-                        self.show_button.configure(text='Insert', state='disabled')
+                        self.show_button.configure(text='Insert card', state='disabled')
                         logger.debug("Labels and button updated for card removal")
                     except Exception as e:
                         logger.error(f"An error occurred while updating labels and button for card removal: {e}",
@@ -2020,7 +2020,7 @@ class View(customtkinter.CTk):
                     logger.info(f"Factory reset in progress. Remaining counter: {sw2}")
                     self.counter = str(sw2) + "/4"
                     msg = f"Please follow the instruction bellow.\n{self.counter}"
-                    self.show('IN PROGRESS', msg, "Remove", lambda: self.click_reset_button(),
+                    self.show('IN PROGRESS', msg, "Remove card", lambda: self.click_reset_button(),
                               "./pictures_db/icon_reset_popup.jpg")
                     self.show_button.configure(state='disabled')
 
@@ -2043,7 +2043,6 @@ class View(customtkinter.CTk):
             logger.error(f"An unexpected error occurred during the factory reset process: {e}", exc_info=True)
 
     def reset_my_card_window(self):
-        #self.controller.cc.card_switch_to_factory_observer()
         self.controller.cc.set_mode_factory_reset(True)
 
         self.in_reset_card = 'display'
@@ -2131,8 +2130,9 @@ class View(customtkinter.CTk):
                 def click_start_button():
                     try:
                         msg = f"Please follow the instruction bellow."
-                        self.show('IN PROGRESS', msg, "Remove", lambda: self.click_reset_button(),
+                        self.show('IN PROGRESS', msg, "Remove card", lambda: self.click_reset_button(),
                                   "./pictures_db/icon_reset_popup.jpg")
+                        self.show_button.configure(state='disabled')
                     except Exception as e:
                         logger.error(f"An error occurred while quitting and redirecting: {e}", exc_info=True)
 
